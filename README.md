@@ -63,13 +63,13 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 ## Development Roadmap
 
 ### Phase 1: Foundation (Months 1-2)
-**Status**: Not started  
+**Status**: In progress 
 **Target**: Bootable touchscreen OS with basic navigation
 
 **Infrastructure**
-- [ ] Configure PlatformIO + LVGL 8/9 development environment
-- [ ] Integrate ST7789_DRIVER display driver (correct pinout for ESP32-2432S028)
-- [ ] Calibrate XPT2046 touchscreen for accurate input
+- [X] Configure PlatformIO + LVGL 8/9 development environment
+- [X] Integrate ST7789_DRIVER display driver (correct pinout for ESP32-2432S028)
+- [X] Calibrate XPT2046 touchscreen for accurate input
 - [ ] Implement double-buffering with FreeRTOS for 60 FPS rendering
 - [ ] Create window/screen manager with navigation stack
 
