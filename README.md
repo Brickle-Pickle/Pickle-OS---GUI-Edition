@@ -71,7 +71,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 - [X] Integrate ST7789_DRIVER display driver (correct pinout for ESP32-2432S028)
 - [X] Calibrate XPT2046 touchscreen for accurate input
 - [X] Implement double-buffering with FreeRTOS for 60 FPS rendering
-- [ ] Create window/screen manager with navigation stack
+- [X] Create window/screen manager with navigation stack
 
 **User Interface**
 - [ ] Design app launcher with touch-friendly icon grid
