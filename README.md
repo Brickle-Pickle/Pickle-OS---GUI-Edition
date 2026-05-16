@@ -23,7 +23,7 @@ This project serves as a professional portfolio piece demonstrating embedded sys
 ### Main Device
 - **ESP32-2432S028** development board
   - ESP32-WROOM-32 module
-  - 2.8" TFT LCD display (ILI9341, 320x240 px)
+  - 2.8" TFT LCD display (ST7789, 320x240 px)
   - Resistive touchscreen (XPT2046)
   - MicroSD card slot
   - USB-C programming interface
@@ -68,7 +68,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 
 **Infrastructure**
 - [ ] Configure PlatformIO + LVGL 8/9 development environment
-- [ ] Integrate ILI9341 display driver (correct pinout for ESP32-2432S028)
+- [ ] Integrate ST7789_DRIVER display driver (correct pinout for ESP32-2432S028)
 - [ ] Calibrate XPT2046 touchscreen for accurate input
 - [ ] Implement double-buffering with FreeRTOS for 60 FPS rendering
 - [ ] Create window/screen manager with navigation stack
@@ -214,6 +214,20 @@ Download the latest `.bin` file from [Releases](../../releases) and flash with e
 ```bash
 esptool.py --port /dev/ttyUSB0 write_flash 0x10000 pickle-os-gui-v1.0.0.bin
 ```
+
+## Hardware Setup Notes
+
+### Display driver configuration
+
+The `User_Setup.h` file for TFT_eSPI must be copied manually into the library folder after installing dependencies: 
+
+```bash
+.pio/libdeps/esp32dev/TFT_eSPI/User_Setup.h
+```
+
+The reference file is located at `include/User_Setup.h` in this repository.
+This board uses an ST7789 driver despite being documented as ILI9341.
+Hardware reset is required on pin 4 before display initialization.
 
 ## Module Development
 
