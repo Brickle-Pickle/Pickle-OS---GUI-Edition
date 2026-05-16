@@ -215,37 +215,6 @@ Download the latest `.bin` file from [Releases](../../releases) and flash with e
 esptool.py --port /dev/ttyUSB0 write_flash 0x10000 pickle-os-gui-v1.0.0.bin
 ```
 
-## Project Structure
-
-```
-Pickle-OS-GUI/
-├── src/
-│   ├── main.cpp              # Entry point
-│   ├── hal/                  # Hardware abstraction layer
-│   │   ├── display.cpp       # ILI9341 driver
-│   │   ├── touch.cpp         # XPT2046 driver
-│   │   └── modules/          # Hot-swap module drivers
-│   ├── kernel/               # FreeRTOS task management
-│   ├── ui/                   # LVGL interface code
-│   │   ├── launcher.cpp      # Home screen
-│   │   ├── keyboard.cpp      # On-screen keyboard
-│   │   └── theme.cpp         # Visual styling
-│   ├── apps/                 # Built-in applications
-│   │   ├── settings/
-│   │   ├── clock/
-│   │   ├── notepad/
-│   │   ├── chat/
-│   │   └── sensors/
-│   └── network/              # WiFi, BLE, web server
-├── include/                  # Header files
-├── lib/                      # External libraries
-├── data/                     # Files for SD card / SPIFFS
-├── platformio.ini            # Build configuration
-├── hardware/                 # PCB designs, 3D models
-│   └── module-adapter/       # 3D printable connector boards
-└── docs/                     # Documentation, diagrams
-```
-
 ## Module Development
 
 ### Creating a New Hardware Module
