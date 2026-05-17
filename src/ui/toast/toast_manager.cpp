@@ -1,4 +1,5 @@
 #include "toast_manager.h"
+#include "../theme/theme.h"
 #include <Arduino.h>
 
 namespace {
@@ -14,7 +15,7 @@ void ToastManager::init() {
     toastContainer = lv_obj_create(lv_layer_top());
     lv_obj_set_size(toastContainer, 180, 50);
     lv_obj_align(toastContainer, LV_ALIGN_BOTTOM_MID, 0, -10);
-    lv_obj_set_style_bg_color(toastContainer, lv_color_hex(0x333333), 0);
+    lv_obj_set_style_bg_color(toastContainer, gTheme->backgroundPopup, 0);
     lv_obj_set_style_bg_opa(toastContainer, LV_OPA_80, 0);
     lv_obj_set_style_radius(toastContainer, 5, 0);
     lv_obj_clear_flag(toastContainer, LV_OBJ_FLAG_SCROLLABLE);
@@ -117,28 +118,28 @@ void ToastManager::showIconToast(const char* message, const void* icon, ToastTyp
 void ToastManager::addColorByType(lv_obj_t* label, lv_obj_t* toastContainer, ToastType toastType, bool isIconToast, lv_obj_t* icon) {
     switch (toastType) {
         case ToastType::INFO:
-            lv_obj_set_style_text_color(label, lv_color_hex(0xDBEAFE), 0);
-            lv_obj_set_style_bg_color(toastContainer, lv_color_hex(0x1E3A8A), 0);
-            if (isIconToast) lv_obj_set_style_text_color(icon, lv_color_hex(0xDBEAFE), 0);
+            lv_obj_set_style_text_color(label, gTheme->primaryLight, 0);
+            lv_obj_set_style_bg_color(toastContainer, gTheme->primaryDark, 0);
+            if (isIconToast) lv_obj_set_style_text_color(icon, gTheme->primaryLight, 0);
             break;
         case ToastType::SUCCESS:
-            lv_obj_set_style_text_color(label, lv_color_hex(0xDCFCE7), 0);
-            lv_obj_set_style_bg_color(toastContainer, lv_color_hex(0x166534), 0);
-            if (isIconToast) lv_obj_set_style_text_color(icon, lv_color_hex(0xDCFCE7), 0);
+            lv_obj_set_style_text_color(label, gTheme->successText, 0);
+            lv_obj_set_style_bg_color(toastContainer, gTheme->successBg, 0);
+            if (isIconToast) lv_obj_set_style_text_color(icon, gTheme->successText, 0);
             break;
         case ToastType::ALERT:
-            lv_obj_set_style_text_color(label, lv_color_hex(0xFEF3C7), 0);
-            lv_obj_set_style_bg_color(toastContainer, lv_color_hex(0x92400E), 0);
-            if (isIconToast) lv_obj_set_style_text_color(icon, lv_color_hex(0xFEF3C7), 0);
+            lv_obj_set_style_text_color(label, gTheme->alertText, 0);
+            lv_obj_set_style_bg_color(toastContainer, gTheme->alertBg, 0);
+            if (isIconToast) lv_obj_set_style_text_color(icon, gTheme->alertText, 0);
             break;
         case ToastType::ERROR:
-            lv_obj_set_style_text_color(label, lv_color_hex(0xFEE2E2), 0);
-            lv_obj_set_style_bg_color(toastContainer, lv_color_hex(0x991B1B), 0);
-            if (isIconToast) lv_obj_set_style_text_color(icon, lv_color_hex(0xFEE2E2), 0);
+            lv_obj_set_style_text_color(label, gTheme->errorText, 0);
+            lv_obj_set_style_bg_color(toastContainer, gTheme->errorBg, 0);
+            if (isIconToast) lv_obj_set_style_text_color(icon, gTheme->errorText, 0);
             break;
         default:
-            lv_obj_set_style_text_color(label, lv_color_hex(0xDBEAFE), 0);
-            lv_obj_set_style_bg_color(toastContainer, lv_color_hex(0x1E3A8A), 0);
-            if (isIconToast) lv_obj_set_style_text_color(icon, lv_color_hex(0xDBEAFE), 0);
+            lv_obj_set_style_text_color(label, gTheme->primaryLight, 0);
+            lv_obj_set_style_bg_color(toastContainer, gTheme->primaryDark, 0);
+            if (isIconToast) lv_obj_set_style_text_color(icon, gTheme->primaryLight, 0);
     }
 }

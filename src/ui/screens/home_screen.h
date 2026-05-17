@@ -2,8 +2,9 @@
 #include "screen_base.h"
 #include "../screen_manager.h"
 #include "../toast/toast_manager.h"
+#include "../theme/theme.h"
 
-#define VERSION "v0.1.4"
+#define VERSION "v0.1.5"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -16,7 +17,7 @@ public:
         _screen = lv_obj_create(NULL);
 
         // Dark background
-        lv_obj_set_style_bg_color(_screen, lv_color_hex(0x121212), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(_screen, gTheme->background, LV_PART_MAIN);
 
         _buildHeader();
         _buildAppGrid();
@@ -43,7 +44,7 @@ private:
         lv_obj_t* header = lv_obj_create(_screen);
         lv_obj_set_size(header, 240, 36);
         lv_obj_set_pos(header, 0, 0);
-        lv_obj_set_style_bg_color(header, lv_color_hex(0x1E1E2E), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(header, gTheme->backgroundPopup, LV_PART_MAIN);
         lv_obj_set_style_border_width(header, 0, LV_PART_MAIN);
         lv_obj_set_style_radius(header, 0, LV_PART_MAIN);
         lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
@@ -51,13 +52,13 @@ private:
         // Title
         lv_obj_t* title = lv_label_create(header);
         lv_label_set_text(title, "Pickle OS");
-        lv_obj_set_style_text_color(title, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+        lv_obj_set_style_text_color(title, gTheme->textDark, LV_PART_MAIN);
         lv_obj_align(title, LV_ALIGN_LEFT_MID, 8, 0);
 
         // Clock (placeholder, updated on resume)
         _clockLabel = lv_label_create(header);
         lv_label_set_text(_clockLabel, "--:--");
-        lv_obj_set_style_text_color(_clockLabel, lv_color_hex(0x89B4FA), LV_PART_MAIN);
+        lv_obj_set_style_text_color(_clockLabel, gTheme->primary, LV_PART_MAIN);
         lv_obj_align(_clockLabel, LV_ALIGN_RIGHT_MID, -8, 0);
     }
 
@@ -116,8 +117,8 @@ private:
             lv_obj_t* btn = lv_btn_create(_screen);
             lv_obj_set_size(btn, ICON_SIZE, ICON_SIZE);
             lv_obj_set_pos(btn, x, y);
-            lv_obj_set_style_bg_color(btn, lv_color_hex(0x313244), LV_PART_MAIN);
-            lv_obj_set_style_bg_color(btn, lv_color_hex(0x45475A), LV_STATE_PRESSED);
+            lv_obj_set_style_bg_color(btn, gTheme->primaryDark, LV_PART_MAIN);
+            lv_obj_set_style_bg_color(btn, gTheme->primary, LV_STATE_PRESSED);
             lv_obj_set_style_radius(btn, 12, LV_PART_MAIN);
             lv_obj_set_style_shadow_width(btn, 8, LV_PART_MAIN);
             lv_obj_set_style_shadow_color(btn, lv_color_hex(0x000000), LV_PART_MAIN);
@@ -127,14 +128,14 @@ private:
             // Icon
             lv_obj_t* ico = lv_label_create(btn);
             lv_label_set_text(ico, apps[i].icon);
-            lv_obj_set_style_text_color(ico, lv_color_hex(0x89B4FA), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ico, gTheme->textDark, LV_PART_MAIN);
             lv_obj_set_style_text_font(ico, &lv_font_montserrat_18, LV_PART_MAIN);
             lv_obj_align(ico, LV_ALIGN_TOP_MID, 0, 8);
 
             // App name
             lv_obj_t* lbl = lv_label_create(btn);
             lv_label_set_text(lbl, apps[i].name);
-            lv_obj_set_style_text_color(lbl, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+            lv_obj_set_style_text_color(lbl, gTheme->textDark, LV_PART_MAIN);
             lv_obj_set_style_text_font(lbl, &lv_font_montserrat_10, LV_PART_MAIN);
             lv_obj_align(lbl, LV_ALIGN_BOTTOM_MID, 0, -4);
 
@@ -148,7 +149,7 @@ private:
     void _buildFooter() {
         lv_obj_t* footer = lv_label_create(_screen);
         lv_label_set_text(footer, VERSION);
-        lv_obj_set_style_text_color(footer, lv_color_hex(0x585B70), LV_PART_MAIN);
+        lv_obj_set_style_text_color(footer, gTheme->textSoft, LV_PART_MAIN);
         lv_obj_set_style_text_font(footer, &lv_font_montserrat_10, LV_PART_MAIN);
         lv_obj_align(footer, LV_ALIGN_BOTTOM_MID, 0, -4);
     }

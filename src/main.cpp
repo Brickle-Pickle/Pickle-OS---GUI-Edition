@@ -7,6 +7,7 @@
 // Screen Manager and screens
 #include "ui/screen_manager.h"
 #include "ui/toast/toast_manager.h"
+#include "ui/theme/theme.h"
 #include "ui/screens/home_screen.h"
 #include "ui/screens/about_screen.h"
 #include "ui/screens/settings_screen.h"
@@ -127,6 +128,9 @@ void setup() {
 
     // Initialize Toast Manager
     ToastManager::getInstance().init();
+
+    // Load persisted theme before building any screen
+    loadTheme();
 
     // Start Screen Manager with HomeScreen
     ScreenManager::getInstance().navigateTo(

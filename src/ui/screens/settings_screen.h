@@ -3,13 +3,14 @@
 #include "screen_base.h"
 #include "../screen_manager.h"
 #include "../keyboard_overlay.h"
+#include "../theme/theme.h"
 
 // SettingsScreen - System settings with all widget types demonstrated
 class SettingsScreen : public ScreenBase {
 public:
     void onCreate() override {
         _screen = lv_obj_create(NULL);
-        lv_obj_set_style_bg_color(_screen, lv_color_hex(0x121212), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(_screen, gTheme->background, LV_PART_MAIN);
 
         _buildHeader();
         _buildContent();
@@ -29,10 +30,10 @@ public:
 private:
     // Member pointers for widgets that are updated at runtime
     lv_obj_t* _brightnessLabel = nullptr;
-    lv_obj_t* _ramBar          = nullptr;
-    lv_obj_t* _ramLabel        = nullptr;
-    lv_obj_t* _scroll          = nullptr;
-    lv_obj_t* _taHostname      = nullptr;
+    lv_obj_t* _ramBar = nullptr;
+    lv_obj_t* _ramLabel = nullptr;
+    lv_obj_t* _scroll = nullptr;
+    lv_obj_t* _taHostname = nullptr;
     KeyboardOverlay _kb;
 
     // Header with back button and screen title
@@ -40,7 +41,7 @@ private:
         lv_obj_t* header = lv_obj_create(_screen);
         lv_obj_set_size(header, 240, 40);
         lv_obj_set_pos(header, 0, 0);
-        lv_obj_set_style_bg_color(header, lv_color_hex(0x1E1E2E), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(header, gTheme->backgroundPopup, LV_PART_MAIN);
         lv_obj_set_style_border_width(header, 0, LV_PART_MAIN);
         lv_obj_set_style_radius(header, 0, LV_PART_MAIN);
         lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
@@ -48,7 +49,7 @@ private:
         lv_obj_t* backBtn = lv_btn_create(header);
         lv_obj_set_size(backBtn, 36, 28);
         lv_obj_align(backBtn, LV_ALIGN_LEFT_MID, 4, 0);
-        lv_obj_set_style_bg_color(backBtn, lv_color_hex(0x313244), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(backBtn, gTheme->primaryDark, LV_PART_MAIN);
         lv_obj_set_style_radius(backBtn, 8, LV_PART_MAIN);
         lv_obj_add_event_cb(backBtn, [](lv_event_t* e) {
             ScreenManager::getInstance().goBack();
@@ -56,12 +57,12 @@ private:
 
         lv_obj_t* backIco = lv_label_create(backBtn);
         lv_label_set_text(backIco, LV_SYMBOL_LEFT);
-        lv_obj_set_style_text_color(backIco, lv_color_hex(0x89B4FA), LV_PART_MAIN);
+        lv_obj_set_style_text_color(backIco, gTheme->primary, LV_PART_MAIN);
         lv_obj_center(backIco);
 
         lv_obj_t* title = lv_label_create(header);
         lv_label_set_text(title, "Settings");
-        lv_obj_set_style_text_color(title, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+        lv_obj_set_style_text_color(title, gTheme->textDark, LV_PART_MAIN);
         lv_obj_align(title, LV_ALIGN_CENTER, 0, 0);
     }
 
@@ -70,7 +71,7 @@ private:
         _scroll = lv_obj_create(_screen);
         lv_obj_set_size(_scroll, 240, 280);
         lv_obj_set_pos(_scroll, 0, 40);
-        lv_obj_set_style_bg_color(_scroll, lv_color_hex(0x121212), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(_scroll, gTheme->background, LV_PART_MAIN);
         lv_obj_set_style_border_width(_scroll, 0, LV_PART_MAIN);
         lv_obj_set_style_radius(_scroll, 0, LV_PART_MAIN);
         lv_obj_set_style_pad_all(_scroll, 8, LV_PART_MAIN);
@@ -111,7 +112,7 @@ private:
         // Section title with icon
         lv_obj_t* sectionTitle = lv_label_create(card);
         lv_label_set_text(sectionTitle, LV_SYMBOL_IMAGE " Display");
-        lv_obj_set_style_text_color(sectionTitle, lv_color_hex(0x89B4FA), LV_PART_MAIN);
+        lv_obj_set_style_text_color(sectionTitle, gTheme->primary, LV_PART_MAIN);
         lv_obj_set_style_text_font(sectionTitle, &lv_font_montserrat_14, LV_PART_MAIN);
 
         _makeSeparator(card);
@@ -120,7 +121,7 @@ private:
         lv_obj_t* rowBrightness = _makeRow(card, "Brightness");
         _brightnessLabel = lv_label_create(rowBrightness);
         lv_label_set_text(_brightnessLabel, "128");
-        lv_obj_set_style_text_color(_brightnessLabel, lv_color_hex(0x585B70), LV_PART_MAIN);
+        lv_obj_set_style_text_color(_brightnessLabel, gTheme->textSoft, LV_PART_MAIN);
         lv_obj_set_style_text_font(_brightnessLabel, &lv_font_montserrat_10, LV_PART_MAIN);
         lv_obj_align(_brightnessLabel, LV_ALIGN_RIGHT_MID, 0, 0);
 
@@ -130,9 +131,9 @@ private:
         lv_obj_set_width(slider, lv_pct(100));
         lv_slider_set_range(slider, 0, 255);
         lv_slider_set_value(slider, 128, LV_ANIM_OFF);
-        lv_obj_set_style_bg_color(slider, lv_color_hex(0x313244), LV_PART_MAIN);
-        lv_obj_set_style_bg_color(slider, lv_color_hex(0x89B4FA), LV_PART_INDICATOR);
-        lv_obj_set_style_bg_color(slider, lv_color_hex(0xCDD6F4), LV_PART_KNOB);
+        lv_obj_set_style_bg_color(slider, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(slider, gTheme->primary, LV_PART_INDICATOR);
+        lv_obj_set_style_bg_color(slider, gTheme->textDark, LV_PART_KNOB);
         lv_obj_add_event_cb(slider, [](lv_event_t* e) {
             SettingsScreen* self = (SettingsScreen*)lv_event_get_user_data(e);
             int32_t val = lv_slider_get_value(lv_event_get_target(e));
@@ -144,14 +145,22 @@ private:
         // Dark mode row: label on left, switch on right
         lv_obj_t* rowDark = _makeRow(card, "Dark mode");
         lv_obj_t* swDark = lv_switch_create(rowDark);
-        lv_obj_set_style_bg_color(swDark, lv_color_hex(0x313244), LV_PART_MAIN);
-        lv_obj_set_style_bg_color(swDark, lv_color_hex(0x89B4FA), LV_PART_MAIN | LV_STATE_CHECKED);
-        lv_obj_set_style_bg_color(swDark, lv_color_hex(0xCDD6F4), LV_PART_KNOB);
+        lv_obj_set_style_bg_color(swDark, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(swDark, gTheme->primary, LV_PART_MAIN | LV_STATE_CHECKED);
+        lv_obj_set_style_bg_color(swDark, gTheme->textDark, LV_PART_KNOB);
         lv_obj_add_state(swDark, LV_STATE_CHECKED);
         lv_obj_align(swDark, LV_ALIGN_RIGHT_MID, 0, 0);
+        if (isDarkTheme()) {
+            lv_obj_add_state(swDark, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(swDark, LV_STATE_CHECKED);
+        }
+        lv_obj_align(swDark, LV_ALIGN_RIGHT_MID, 0, 0);
+
         lv_obj_add_event_cb(swDark, [](lv_event_t* e) {
             bool on = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
-            (void)on;
+            saveTheme(on);
+            ScreenManager::getInstance().goHome();
         }, LV_EVENT_VALUE_CHANGED, NULL);
     }
 
@@ -162,7 +171,7 @@ private:
 
         lv_obj_t* sectionTitle = lv_label_create(card);
         lv_label_set_text(sectionTitle, LV_SYMBOL_WIFI " Connectivity");
-        lv_obj_set_style_text_color(sectionTitle, lv_color_hex(0x89B4FA), LV_PART_MAIN);
+        lv_obj_set_style_text_color(sectionTitle, gTheme->primary, LV_PART_MAIN);
         lv_obj_set_style_text_font(sectionTitle, &lv_font_montserrat_14, LV_PART_MAIN);
 
         _makeSeparator(card);
@@ -170,9 +179,9 @@ private:
         // WiFi enabled toggle
         lv_obj_t* rowWifi = _makeRow(card, "WiFi enabled");
         lv_obj_t* swWifi = lv_switch_create(rowWifi);
-        lv_obj_set_style_bg_color(swWifi, lv_color_hex(0x313244), LV_PART_MAIN);
-        lv_obj_set_style_bg_color(swWifi, lv_color_hex(0x89B4FA), LV_PART_MAIN | LV_STATE_CHECKED);
-        lv_obj_set_style_bg_color(swWifi, lv_color_hex(0xCDD6F4), LV_PART_KNOB);
+        lv_obj_set_style_bg_color(swWifi, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(swWifi, gTheme->primary, LV_PART_MAIN | LV_STATE_CHECKED);
+        lv_obj_set_style_bg_color(swWifi, gTheme->textDark, LV_PART_KNOB);
         lv_obj_add_state(swWifi, LV_STATE_CHECKED);
         lv_obj_align(swWifi, LV_ALIGN_RIGHT_MID, 0, 0);
         lv_obj_add_event_cb(swWifi, [](lv_event_t* e) {
@@ -188,8 +197,8 @@ private:
         lv_dropdown_set_options(dd, "Auto\n2.4 GHz\n5 GHz");
         lv_dropdown_set_selected(dd, 0);
         lv_obj_set_width(dd, 110);
-        lv_obj_set_style_bg_color(dd, lv_color_hex(0x313244), LV_PART_MAIN);
-        lv_obj_set_style_text_color(dd, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(dd, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_text_color(dd, gTheme->textDark, LV_PART_MAIN);
         lv_obj_set_style_border_width(dd, 0, LV_PART_MAIN);
         lv_obj_set_style_radius(dd, 8, LV_PART_MAIN);
         lv_obj_align(dd, LV_ALIGN_RIGHT_MID, 0, 0);
@@ -203,7 +212,7 @@ private:
         // Hostname label above the text area
         lv_obj_t* lblHost = lv_label_create(card);
         lv_label_set_text(lblHost, "Hostname");
-        lv_obj_set_style_text_color(lblHost, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+        lv_obj_set_style_text_color(lblHost, gTheme->textDark, LV_PART_MAIN);
         lv_obj_set_style_text_font(lblHost, &lv_font_montserrat_14, LV_PART_MAIN);
 
         // Text area - single-line input for a device hostname
@@ -214,11 +223,11 @@ private:
         lv_textarea_set_one_line(_taHostname, true);
         lv_textarea_set_placeholder_text(_taHostname, "pickle-os.local");
         lv_textarea_set_max_length(_taHostname, 64);
-        lv_obj_set_style_bg_color(_taHostname, lv_color_hex(0x313244), LV_PART_MAIN);
-        lv_obj_set_style_text_color(_taHostname, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
-        lv_obj_set_style_border_color(_taHostname, lv_color_hex(0x45475A), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(_taHostname, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_text_color(_taHostname, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taHostname, gTheme->textSoft, LV_PART_MAIN);
         lv_obj_set_style_border_width(_taHostname, 1, LV_PART_MAIN);
-        lv_obj_set_style_border_color(_taHostname, lv_color_hex(0x89B4FA), LV_PART_MAIN | LV_STATE_FOCUSED);
+        lv_obj_set_style_border_color(_taHostname, gTheme->primary, LV_PART_MAIN | LV_STATE_FOCUSED);
         lv_obj_set_style_radius(_taHostname, 8, LV_PART_MAIN);
 
         _makeSeparator(card);
@@ -226,11 +235,11 @@ private:
         // Checkbox - boolean option with an inline text label
         lv_obj_t* cb = lv_checkbox_create(card);
         lv_checkbox_set_text(cb, "Auto-reconnect on boot");
-        lv_obj_set_style_text_color(cb, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+        lv_obj_set_style_text_color(cb, gTheme->textDark, LV_PART_MAIN);
         lv_obj_set_style_text_font(cb, &lv_font_montserrat_14, LV_PART_MAIN);
-        lv_obj_set_style_bg_color(cb, lv_color_hex(0x313244), LV_PART_INDICATOR);
-        lv_obj_set_style_bg_color(cb, lv_color_hex(0x89B4FA), LV_PART_INDICATOR | LV_STATE_CHECKED);
-        lv_obj_set_style_border_color(cb, lv_color_hex(0x45475A), LV_PART_INDICATOR);
+        lv_obj_set_style_bg_color(cb, gTheme->primaryDark, LV_PART_INDICATOR);
+        lv_obj_set_style_bg_color(cb, gTheme->primary, LV_PART_INDICATOR | LV_STATE_CHECKED);
+        lv_obj_set_style_border_color(cb, gTheme->textSoft, LV_PART_INDICATOR);
         lv_obj_set_style_border_width(cb, 1, LV_PART_INDICATOR);
         lv_obj_add_state(cb, LV_STATE_CHECKED);
         lv_obj_add_event_cb(cb, [](lv_event_t* e) {
@@ -246,7 +255,7 @@ private:
 
         lv_obj_t* sectionTitle = lv_label_create(card);
         lv_label_set_text(sectionTitle, LV_SYMBOL_SETTINGS " System");
-        lv_obj_set_style_text_color(sectionTitle, lv_color_hex(0x89B4FA), LV_PART_MAIN);
+        lv_obj_set_style_text_color(sectionTitle, gTheme->primary, LV_PART_MAIN);
         lv_obj_set_style_text_font(sectionTitle, &lv_font_montserrat_14, LV_PART_MAIN);
 
         _makeSeparator(card);
@@ -256,7 +265,7 @@ private:
         lv_obj_t* rowRam = _makeRow(card, "Free RAM");
         _ramLabel = lv_label_create(rowRam);
         lv_label_set_text(_ramLabel, "-- KB");
-        lv_obj_set_style_text_color(_ramLabel, lv_color_hex(0x585B70), LV_PART_MAIN);
+        lv_obj_set_style_text_color(_ramLabel, gTheme->textSoft, LV_PART_MAIN);
         lv_obj_set_style_text_font(_ramLabel, &lv_font_montserrat_10, LV_PART_MAIN);
         lv_obj_align(_ramLabel, LV_ALIGN_RIGHT_MID, 0, 0);
 
@@ -264,10 +273,10 @@ private:
         _ramBar = lv_bar_create(card);
         lv_obj_set_width(_ramBar, lv_pct(100));
         lv_obj_set_height(_ramBar, 12);
-        lv_bar_set_range(_ramBar, 0, 320);      // ESP32 has ~320 KB total SRAM
+        lv_bar_set_range(_ramBar, 0, 320); // ESP32 has ~320 KB total SRAM
         lv_bar_set_value(_ramBar, 0, LV_ANIM_OFF);
-        lv_obj_set_style_bg_color(_ramBar, lv_color_hex(0x313244), LV_PART_MAIN);
-        lv_obj_set_style_bg_color(_ramBar, lv_color_hex(0x89B4FA), LV_PART_INDICATOR);
+        lv_obj_set_style_bg_color(_ramBar, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(_ramBar, gTheme->primary, LV_PART_INDICATOR);
         lv_obj_set_style_radius(_ramBar, 6, LV_PART_MAIN);
         lv_obj_set_style_radius(_ramBar, 6, LV_PART_INDICATOR);
 
@@ -287,7 +296,7 @@ private:
         // Section title in danger color to signal destructive actions
         lv_obj_t* sectionTitle = lv_label_create(card);
         lv_label_set_text(sectionTitle, LV_SYMBOL_WARNING " Danger zone");
-        lv_obj_set_style_text_color(sectionTitle, lv_color_hex(0xF38BA8), LV_PART_MAIN);
+        lv_obj_set_style_text_color(sectionTitle, gTheme->errorText, LV_PART_MAIN);
         lv_obj_set_style_text_font(sectionTitle, &lv_font_montserrat_14, LV_PART_MAIN);
 
         _makeSeparator(card);
@@ -296,8 +305,8 @@ private:
         lv_obj_t* btnReset = lv_btn_create(card);
         lv_obj_set_width(btnReset, lv_pct(100));
         lv_obj_set_height(btnReset, 36);
-        lv_obj_set_style_bg_color(btnReset, lv_color_hex(0x3D1E25), LV_PART_MAIN);
-        lv_obj_set_style_bg_color(btnReset, lv_color_hex(0x5C2030), LV_STATE_PRESSED);
+        lv_obj_set_style_bg_color(btnReset, gTheme->errorBg, LV_PART_MAIN);
+        lv_obj_set_style_bg_color(btnReset, gTheme->errorText, LV_STATE_PRESSED);
         lv_obj_set_style_radius(btnReset, 8, LV_PART_MAIN);
         lv_obj_add_event_cb(btnReset, [](lv_event_t* e) {
             // Trigger factory reset here when implemented
@@ -305,7 +314,7 @@ private:
 
         lv_obj_t* btnLbl = lv_label_create(btnReset);
         lv_label_set_text(btnLbl, LV_SYMBOL_TRASH " Reset to factory defaults");
-        lv_obj_set_style_text_color(btnLbl, lv_color_hex(0xF38BA8), LV_PART_MAIN);
+        lv_obj_set_style_text_color(btnLbl, gTheme->errorText, LV_PART_MAIN);
         lv_obj_set_style_text_font(btnLbl, &lv_font_montserrat_14, LV_PART_MAIN);
         lv_obj_center(btnLbl);
     }
@@ -323,7 +332,7 @@ private:
         lv_obj_t* card = lv_obj_create(parent);
         lv_obj_set_width(card, lv_pct(100));
         lv_obj_set_height(card, LV_SIZE_CONTENT);
-        lv_obj_set_style_bg_color(card, lv_color_hex(0x1E1E2E), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(card, gTheme->backgroundPopup, LV_PART_MAIN);
         lv_obj_set_style_border_width(card, 0, LV_PART_MAIN);
         lv_obj_set_style_radius(card, 12, LV_PART_MAIN);
         lv_obj_set_style_pad_all(card, 12, LV_PART_MAIN);
@@ -345,7 +354,7 @@ private:
 
         lv_obj_t* lbl = lv_label_create(row);
         lv_label_set_text(lbl, labelText);
-        lv_obj_set_style_text_color(lbl, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+        lv_obj_set_style_text_color(lbl, gTheme->textDark, LV_PART_MAIN);
         lv_obj_set_style_text_font(lbl, &lv_font_montserrat_14, LV_PART_MAIN);
         lv_obj_align(lbl, LV_ALIGN_LEFT_MID, 0, 0);
 
@@ -363,13 +372,13 @@ private:
 
         lv_obj_t* keyLbl = lv_label_create(row);
         lv_label_set_text(keyLbl, key);
-        lv_obj_set_style_text_color(keyLbl, lv_color_hex(0x585B70), LV_PART_MAIN);
+        lv_obj_set_style_text_color(keyLbl, gTheme->textSoft, LV_PART_MAIN);
         lv_obj_set_style_text_font(keyLbl, &lv_font_montserrat_10, LV_PART_MAIN);
         lv_obj_align(keyLbl, LV_ALIGN_LEFT_MID, 0, 0);
 
         lv_obj_t* valLbl = lv_label_create(row);
         lv_label_set_text(valLbl, val);
-        lv_obj_set_style_text_color(valLbl, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+        lv_obj_set_style_text_color(valLbl, gTheme->textDark, LV_PART_MAIN);
         lv_obj_set_style_text_font(valLbl, &lv_font_montserrat_10, LV_PART_MAIN);
         lv_obj_align(valLbl, LV_ALIGN_RIGHT_MID, 0, 0);
     }
@@ -378,7 +387,7 @@ private:
     void _makeSeparator(lv_obj_t* parent) {
         lv_obj_t* sep = lv_obj_create(parent);
         lv_obj_set_size(sep, lv_pct(100), 1);
-        lv_obj_set_style_bg_color(sep, lv_color_hex(0x45475A), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(sep, gTheme->textSoft, LV_PART_MAIN);
         lv_obj_set_style_border_width(sep, 0, LV_PART_MAIN);
         lv_obj_set_style_radius(sep, 0, LV_PART_MAIN);
         lv_obj_set_style_pad_all(sep, 0, LV_PART_MAIN);
