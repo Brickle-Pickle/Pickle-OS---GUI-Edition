@@ -8,8 +8,13 @@
 #include "ui/screen_manager.h"
 #include "ui/screens/home_screen.h"
 #include "ui/screens/about_screen.h"
+#include "ui/screens/settings_screen.h"
 
 // Launchers
+void launchSettings() {
+    ScreenManager::getInstance().navigateTo(
+        new SettingsScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
+}
 void launchAbout() {
     ScreenManager::getInstance().navigateTo(
         new AboutScreen(), LV_SCR_LOAD_ANIM_FADE_ON);

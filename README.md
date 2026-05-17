@@ -290,6 +290,8 @@ Contributions welcome. Please:
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for coding standards and conventions.
 
+See [Screen Making Guide](docs/screen_making_tutorial.md) for best practices on designing LVGL screens.
+
 ## Known Limitations
 
 - **RAM**: ESP32 has ~320 KB total. LVGL double-buffering is memory-intensive. Optimize buffer size vs FPS.

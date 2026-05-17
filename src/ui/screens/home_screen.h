@@ -5,6 +5,7 @@
 #define VERSION "v0.1.0"
 
 // Forward declarations for avoiding circular includes
+class SettingsScreen;
 class AboutScreen;
 
 // HomeScreen - Home screen with app grid
@@ -70,7 +71,8 @@ private:
 
         // Static callbacks (necessary for lv_event_cb_t)
         static auto cbSettings = [](lv_event_t* e) {
-            // Placeholder: when Settings screen is implemented, launch it here
+            extern void launchSettings();
+            launchSettings();
         };
         static auto cbAbout = [](lv_event_t* e) {
             extern void launchAbout();
