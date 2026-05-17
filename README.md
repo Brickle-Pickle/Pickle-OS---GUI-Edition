@@ -84,7 +84,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 ---
 
 ### Phase 2: Connectivity & Storage (Months 3-4)
-**Status**: Not started  
+**Status**: In progress  
 **Target**: WiFi-enabled OS with OTA updates and persistent storage
 
 **WiFi & Network**
@@ -163,7 +163,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 - [ ] High score tracking (stored on SD card)
 
 **User Experience**
-- [ ] Dark/light theme toggle
+- [X] Dark/light theme toggle
 - [ ] Adaptive brightness control (optional photoresistor)
 - [ ] Lock screen with PIN code entry
 - [ ] Power saving mode with deep sleep

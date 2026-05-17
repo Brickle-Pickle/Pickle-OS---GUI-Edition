@@ -11,6 +11,7 @@
 #include "ui/screens/home_screen.h"
 #include "ui/screens/about_screen.h"
 #include "ui/screens/settings_screen.h"
+#include "ui/screens/splash_screen.h"
 
 // Launchers
 void launchSettings() {
@@ -136,9 +137,9 @@ void setup() {
     loadTheme();
     loadFont();
 
-    // Start Screen Manager with HomeScreen
+    // Start with SplashScreen, auto-navigates to HomeScreen after 2.5s
     ScreenManager::getInstance().navigateTo(
-        new HomeScreen(), LV_SCR_LOAD_ANIM_FADE_ON, 400);
+        new SplashScreen(), LV_SCR_LOAD_ANIM_FADE_ON, 400);
 
     // Start LVGL on core 1 (core 0 free for WiFi/BT later)
     xTaskCreatePinnedToCore(lvglTask, "lvgl", 8192, NULL, 1, NULL, 1);
