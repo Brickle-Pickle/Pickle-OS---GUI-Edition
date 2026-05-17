@@ -6,7 +6,7 @@
 
 // Screen Manager and screens
 #include "ui/screen_manager.h"
-#include "ui/toast_manager.h"
+#include "ui/toast/toast_manager.h"
 #include "ui/screens/home_screen.h"
 #include "ui/screens/about_screen.h"
 #include "ui/screens/settings_screen.h"

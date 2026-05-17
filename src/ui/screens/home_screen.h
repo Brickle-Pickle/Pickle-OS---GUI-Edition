@@ -1,8 +1,9 @@
 #pragma once
 #include "screen_base.h"
 #include "../screen_manager.h"
+#include "../toast/toast_manager.h"
 
-#define VERSION "v0.1.3"
+#define VERSION "v0.1.4"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -79,13 +80,13 @@ private:
             launchAbout();
         };
         static auto cbAlerts = [](lv_event_t* e) {
-            ToastManager::getInstance().showToast("Alerts comming soon!");
+            ToastManager::getInstance().showToast("Alerts comming soon!", ToastType::ALERT);
         };
         static auto cbWiFi = [](lv_event_t* e) {
-            ToastManager::getInstance().showToast("WiFi coming soon!");
+            ToastManager::getInstance().showIconToast("WiFi coming soon!", LV_SYMBOL_WIFI, ToastType::SUCCESS);
         };
         static auto cbFiles = [](lv_event_t* e) {
-            ToastManager::getInstance().showToast("File manager coming soon!");
+            ToastManager::getInstance().showIconToast("File manager coming soon!", LV_SYMBOL_SD_CARD, ToastType::ERROR);
         };
         static auto cbGames = [](lv_event_t* e) {
             ToastManager::getInstance().showToast("Games coming soon!");
