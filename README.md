@@ -74,8 +74,8 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 - [X] Create window/screen manager with navigation stack
 
 **User Interface**
-- [ ] Design app launcher with touch-friendly icon grid
-- [ ] Build on-screen keyboard (QWERTY + numeric layouts)
+- [X] Design app launcher with touch-friendly icon grid
+- [X] Build on-screen keyboard (QWERTY + numeric layouts)
 - [ ] Implement toast notification system
 - [ ] Create custom visual theme (colors, fonts, icons)
 

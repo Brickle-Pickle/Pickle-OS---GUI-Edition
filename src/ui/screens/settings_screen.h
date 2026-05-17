@@ -2,6 +2,7 @@
 #include <esp_heap_caps.h>
 #include "screen_base.h"
 #include "../screen_manager.h"
+#include "../keyboard_overlay.h"
 
 // SettingsScreen - System settings with all widget types demonstrated
 class SettingsScreen : public ScreenBase {
@@ -28,8 +29,11 @@ public:
 private:
     // Member pointers for widgets that are updated at runtime
     lv_obj_t* _brightnessLabel = nullptr;
-    lv_obj_t* _ramBar = nullptr;
-    lv_obj_t* _ramLabel = nullptr;
+    lv_obj_t* _ramBar          = nullptr;
+    lv_obj_t* _ramLabel        = nullptr;
+    lv_obj_t* _scroll          = nullptr;
+    lv_obj_t* _taHostname      = nullptr;
+    KeyboardOverlay _kb;
 
     // Header with back button and screen title
     void _buildHeader() {
@@ -63,20 +67,40 @@ private:
 
     // Scrollable area that holds all section cards
     void _buildContent() {
-        lv_obj_t* scroll = lv_obj_create(_screen);
-        lv_obj_set_size(scroll, 240, 280);
-        lv_obj_set_pos(scroll, 0, 40);
-        lv_obj_set_style_bg_color(scroll, lv_color_hex(0x121212), LV_PART_MAIN);
-        lv_obj_set_style_border_width(scroll, 0, LV_PART_MAIN);
-        lv_obj_set_style_radius(scroll, 0, LV_PART_MAIN);
-        lv_obj_set_style_pad_all(scroll, 8, LV_PART_MAIN);
-        lv_obj_set_style_pad_row(scroll, 8, LV_PART_MAIN);
-        lv_obj_set_flex_flow(scroll, LV_FLEX_FLOW_COLUMN);
+        _scroll = lv_obj_create(_screen);
+        lv_obj_set_size(_scroll, 240, 280);
+        lv_obj_set_pos(_scroll, 0, 40);
+        lv_obj_set_style_bg_color(_scroll, lv_color_hex(0x121212), LV_PART_MAIN);
+        lv_obj_set_style_border_width(_scroll, 0, LV_PART_MAIN);
+        lv_obj_set_style_radius(_scroll, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(_scroll, 8, LV_PART_MAIN);
+        lv_obj_set_style_pad_row(_scroll, 8, LV_PART_MAIN);
+        lv_obj_set_flex_flow(_scroll, LV_FLEX_FLOW_COLUMN);
 
-        _buildDisplaySection(scroll);
-        _buildConnectivitySection(scroll);
-        _buildSystemSection(scroll);
-        _buildDangerSection(scroll);
+        _buildDisplaySection(_scroll);
+        _buildConnectivitySection(_scroll);
+        _buildSystemSection(_scroll);
+        _buildDangerSection(_scroll);
+
+        // Keyboard: sits at screen bottom, shows when hostname textarea gains focus
+        _kb.create(_screen);
+        _kb.linkTo(_taHostname);
+
+        lv_obj_add_event_cb(_taHostname, [](lv_event_t* e) {
+            SettingsScreen* self = (SettingsScreen*)lv_event_get_user_data(e);
+            lv_obj_set_height(self->_scroll, 140); // shrink scroll above keyboard
+            self->_kb.show();
+            lv_obj_scroll_to_view(self->_taHostname, LV_ANIM_ON);
+        }, LV_EVENT_FOCUSED, this);
+
+        // Hide keyboard and restore scroll on OK (✓) or Cancel (✕)
+        auto hideKb = [](lv_event_t* e) {
+            SettingsScreen* self = (SettingsScreen*)lv_event_get_user_data(e);
+            self->_kb.hide();
+            lv_obj_set_height(self->_scroll, 280);
+        };
+        lv_obj_add_event_cb(_kb.obj(), hideKb, LV_EVENT_READY,  this);
+        lv_obj_add_event_cb(_kb.obj(), hideKb, LV_EVENT_CANCEL, this);
     }
 
     // Section: Display
@@ -184,18 +208,18 @@ private:
 
         // Text area - single-line input for a device hostname
         // Shows a placeholder when empty and highlights the border when focused
-        lv_obj_t* ta = lv_textarea_create(card);
-        lv_obj_set_width(ta, lv_pct(100));
-        lv_obj_set_height(ta, 38);
-        lv_textarea_set_one_line(ta, true);
-        lv_textarea_set_placeholder_text(ta, "pickle-os.local");
-        lv_textarea_set_max_length(ta, 64);
-        lv_obj_set_style_bg_color(ta, lv_color_hex(0x313244), LV_PART_MAIN);
-        lv_obj_set_style_text_color(ta, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
-        lv_obj_set_style_border_color(ta, lv_color_hex(0x45475A), LV_PART_MAIN);
-        lv_obj_set_style_border_width(ta, 1, LV_PART_MAIN);
-        lv_obj_set_style_border_color(ta, lv_color_hex(0x89B4FA), LV_PART_MAIN | LV_STATE_FOCUSED);
-        lv_obj_set_style_radius(ta, 8, LV_PART_MAIN);
+        _taHostname = lv_textarea_create(card);
+        lv_obj_set_width(_taHostname, lv_pct(100));
+        lv_obj_set_height(_taHostname, 38);
+        lv_textarea_set_one_line(_taHostname, true);
+        lv_textarea_set_placeholder_text(_taHostname, "pickle-os.local");
+        lv_textarea_set_max_length(_taHostname, 64);
+        lv_obj_set_style_bg_color(_taHostname, lv_color_hex(0x313244), LV_PART_MAIN);
+        lv_obj_set_style_text_color(_taHostname, lv_color_hex(0xCDD6F4), LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taHostname, lv_color_hex(0x45475A), LV_PART_MAIN);
+        lv_obj_set_style_border_width(_taHostname, 1, LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taHostname, lv_color_hex(0x89B4FA), LV_PART_MAIN | LV_STATE_FOCUSED);
+        lv_obj_set_style_radius(_taHostname, 8, LV_PART_MAIN);
 
         _makeSeparator(card);
 
