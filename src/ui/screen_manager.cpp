@@ -85,6 +85,17 @@ void ScreenManager::replaceCurrent(
     Serial.printf("[ScreenManager] replaceCurrent → stack depth: %d\n", (int)_stack.size());
 }
 
+// replaceRoot — destroy everything and start fresh
+void ScreenManager::replaceRoot(ScreenBase* screen, lv_scr_load_anim_t anim, uint32_t animTime)
+{
+    if (!screen) return;
+    clearStack();
+    screen->onCreate();
+    lv_scr_load_anim(screen->getScreen(), anim, animTime, 0, false);
+    _stack.push_back(screen);
+    Serial.println("[ScreenManager] replaceRoot → fresh root");
+}
+
 // clearStack (reset)
 void ScreenManager::clearStack()
 {

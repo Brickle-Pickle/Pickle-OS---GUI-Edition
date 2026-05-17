@@ -4,7 +4,7 @@
 #include "../toast/toast_manager.h"
 #include "../theme/theme.h"
 
-#define VERSION "v0.1.5"
+#define VERSION "v0.1.6"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -129,14 +129,14 @@ private:
             lv_obj_t* ico = lv_label_create(btn);
             lv_label_set_text(ico, apps[i].icon);
             lv_obj_set_style_text_color(ico, gTheme->textDark, LV_PART_MAIN);
-            lv_obj_set_style_text_font(ico, &lv_font_montserrat_18, LV_PART_MAIN);
+            lv_obj_set_style_text_font(ico, gFontIconLarge, LV_PART_MAIN);
             lv_obj_align(ico, LV_ALIGN_TOP_MID, 0, 8);
 
             // App name
             lv_obj_t* lbl = lv_label_create(btn);
             lv_label_set_text(lbl, apps[i].name);
             lv_obj_set_style_text_color(lbl, gTheme->textDark, LV_PART_MAIN);
-            lv_obj_set_style_text_font(lbl, &lv_font_montserrat_10, LV_PART_MAIN);
+            lv_obj_set_style_text_font(lbl, gFontSmall, LV_PART_MAIN);
             lv_obj_align(lbl, LV_ALIGN_BOTTOM_MID, 0, -4);
 
             if (apps[i].cb) {
@@ -150,7 +150,7 @@ private:
         lv_obj_t* footer = lv_label_create(_screen);
         lv_label_set_text(footer, VERSION);
         lv_obj_set_style_text_color(footer, gTheme->textSoft, LV_PART_MAIN);
-        lv_obj_set_style_text_font(footer, &lv_font_montserrat_10, LV_PART_MAIN);
+        lv_obj_set_style_text_font(footer, gFontSmall, LV_PART_MAIN);
         lv_obj_align(footer, LV_ALIGN_BOTTOM_MID, 0, -4);
     }
 

@@ -45,7 +45,7 @@ void ToastManager::showToast(const char* message, ToastType toastType, uint32_t 
     // If message is too long will clip '...' at the end
     lv_obj_t* label = lv_label_create(toastContainer);
     lv_label_set_text(label, message);
-    lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_obj_set_style_text_font(label, gFontNormal, LV_PART_MAIN);
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
     lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);  
     lv_obj_set_width(label, 180 - 10); // 10px padding for ellipsis
@@ -85,7 +85,7 @@ void ToastManager::showIconToast(const char* message, const void* icon, ToastTyp
     // Create a new label for the toast message
     lv_obj_t* label = lv_label_create(toastContainer);
     lv_label_set_text(label, message);
-    lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_obj_set_style_text_font(label, gFontNormal, LV_PART_MAIN);
     lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
     lv_obj_set_width(label, 180 - 10 - 40); // 10px padding + 40px for icon
     lv_obj_align(label, LV_ALIGN_CENTER, 20, 0); // Shift right for icon
@@ -95,7 +95,7 @@ void ToastManager::showIconToast(const char* message, const void* icon, ToastTyp
     if (icon) {
         iconLabel = lv_label_create(toastContainer);
         lv_label_set_text(iconLabel, (const char*)icon);
-        lv_obj_set_style_text_font(iconLabel, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(iconLabel, gFontIcon, LV_PART_MAIN);
         lv_obj_align(iconLabel, LV_ALIGN_LEFT_MID, 10, 0);
     }
 

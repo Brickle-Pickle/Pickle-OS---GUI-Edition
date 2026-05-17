@@ -1,6 +1,9 @@
 #pragma once
 #include <lvgl.h>
 #include <Preferences.h>
+LV_FONT_DECLARE(font_indie_flower_18);
+LV_FONT_DECLARE(font_indie_flower_14);
+LV_FONT_DECLARE(font_indie_flower_12);
 
 struct Theme {
     lv_color_t primary;
@@ -84,4 +87,50 @@ inline void loadTheme() {
 
 inline bool isDarkTheme() {
     return gTheme == &THEME_DARK;
+}
+
+// Global font scale — three semantic sizes used across the entire UI
+// Swap these via setFont() to change every font in one place
+inline const lv_font_t* gFontLarge  = &lv_font_montserrat_18; // titles, prominent labels
+inline const lv_font_t* gFontNormal = &lv_font_montserrat_14; // body text, section headers
+inline const lv_font_t* gFontSmall  = &lv_font_montserrat_10; // captions, values, version
+
+// Icon fonts — NEVER swapped: LV_SYMBOL_* glyphs only exist in Montserrat
+inline const lv_font_t* const gFontIconLarge = &lv_font_montserrat_18;
+inline const lv_font_t* const gFontIcon      = &lv_font_montserrat_14;
+
+// gFont kept as alias for gFontNormal for backwards compatibility
+inline const lv_font_t*& gFont = gFontNormal;
+
+// Tracks the active font key — read this to preselect the UI picker
+inline const char* gFontName = "montserrat";
+
+inline void setFont(const char* fontName) {
+    if (strcmp(fontName, "indie_flower") == 0) {
+        gFontLarge  = &font_indie_flower_18;
+        gFontNormal = &font_indie_flower_14;
+        gFontSmall  = &font_indie_flower_12;
+        gFontName   = "indie_flower";
+    } else {
+        gFontLarge  = &lv_font_montserrat_18;
+        gFontNormal = &lv_font_montserrat_14;
+        gFontSmall  = &lv_font_montserrat_10;
+        gFontName   = "montserrat";
+    }
+}
+
+inline void saveFont(const char* fontName) {
+    setFont(fontName);
+    Preferences prefs;
+    prefs.begin("pickle-os", false);
+    prefs.putString("font", fontName);
+    prefs.end();
+}
+
+inline void loadFont() {
+    Preferences prefs;
+    prefs.begin("pickle-os", true);
+    String fontName = prefs.getString("font", "montserrat");
+    prefs.end();
+    setFont(fontName.c_str());
 }

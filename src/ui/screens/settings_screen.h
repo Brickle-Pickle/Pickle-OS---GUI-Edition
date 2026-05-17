@@ -113,7 +113,7 @@ private:
         lv_obj_t* sectionTitle = lv_label_create(card);
         lv_label_set_text(sectionTitle, LV_SYMBOL_IMAGE " Display");
         lv_obj_set_style_text_color(sectionTitle, gTheme->primary, LV_PART_MAIN);
-        lv_obj_set_style_text_font(sectionTitle, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(sectionTitle, gFontIcon, LV_PART_MAIN);
 
         _makeSeparator(card);
 
@@ -122,7 +122,7 @@ private:
         _brightnessLabel = lv_label_create(rowBrightness);
         lv_label_set_text(_brightnessLabel, "128");
         lv_obj_set_style_text_color(_brightnessLabel, gTheme->textSoft, LV_PART_MAIN);
-        lv_obj_set_style_text_font(_brightnessLabel, &lv_font_montserrat_10, LV_PART_MAIN);
+        lv_obj_set_style_text_font(_brightnessLabel, gFontSmall, LV_PART_MAIN);
         lv_obj_align(_brightnessLabel, LV_ALIGN_RIGHT_MID, 0, 0);
 
         // Slider - full width, updates _brightnessLabel on drag
@@ -143,7 +143,7 @@ private:
         _makeSeparator(card);
 
         // Dark mode row: label on left, switch on right
-        lv_obj_t* rowDark = _makeRow(card, "Dark mode");
+        lv_obj_t* rowDark = _makeRow(card, "Light mode");
         lv_obj_t* swDark = lv_switch_create(rowDark);
         lv_obj_set_style_bg_color(swDark, gTheme->primaryDark, LV_PART_MAIN);
         lv_obj_set_style_bg_color(swDark, gTheme->primary, LV_PART_MAIN | LV_STATE_CHECKED);
@@ -160,7 +160,29 @@ private:
         lv_obj_add_event_cb(swDark, [](lv_event_t* e) {
             bool on = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
             saveTheme(on);
-            ScreenManager::getInstance().goHome();
+            extern void resetToHome();
+            resetToHome();
+        }, LV_EVENT_VALUE_CHANGED, NULL);
+
+        _makeSeparator(card);
+
+        // Font selector
+        lv_obj_t* rowFont = _makeRow(card, "Font");
+        lv_obj_t* ddFont = lv_dropdown_create(rowFont);
+        lv_dropdown_set_options(ddFont, "Montserrat\nIndie Flower");
+        lv_dropdown_set_selected(ddFont, strcmp(gFontName, "indie_flower") == 0 ? 1 : 0);
+        lv_obj_set_width(ddFont, 120);
+        lv_obj_set_style_bg_color(ddFont, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_text_color(ddFont, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_text_font(ddFont, gFontSmall, LV_PART_MAIN);
+        lv_obj_set_style_border_width(ddFont, 0, LV_PART_MAIN);
+        lv_obj_set_style_radius(ddFont, 8, LV_PART_MAIN);
+        lv_obj_align(ddFont, LV_ALIGN_RIGHT_MID, 0, 0);
+        lv_obj_add_event_cb(ddFont, [](lv_event_t* e) {
+            uint16_t idx = lv_dropdown_get_selected(lv_event_get_target(e));
+            saveFont(idx == 1 ? "indie_flower" : "montserrat");
+            extern void resetToHome();
+            resetToHome();
         }, LV_EVENT_VALUE_CHANGED, NULL);
     }
 
@@ -172,7 +194,7 @@ private:
         lv_obj_t* sectionTitle = lv_label_create(card);
         lv_label_set_text(sectionTitle, LV_SYMBOL_WIFI " Connectivity");
         lv_obj_set_style_text_color(sectionTitle, gTheme->primary, LV_PART_MAIN);
-        lv_obj_set_style_text_font(sectionTitle, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(sectionTitle, gFontIcon, LV_PART_MAIN);
 
         _makeSeparator(card);
 
@@ -213,7 +235,7 @@ private:
         lv_obj_t* lblHost = lv_label_create(card);
         lv_label_set_text(lblHost, "Hostname");
         lv_obj_set_style_text_color(lblHost, gTheme->textDark, LV_PART_MAIN);
-        lv_obj_set_style_text_font(lblHost, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(lblHost, gFontNormal, LV_PART_MAIN);
 
         // Text area - single-line input for a device hostname
         // Shows a placeholder when empty and highlights the border when focused
@@ -236,7 +258,7 @@ private:
         lv_obj_t* cb = lv_checkbox_create(card);
         lv_checkbox_set_text(cb, "Auto-reconnect on boot");
         lv_obj_set_style_text_color(cb, gTheme->textDark, LV_PART_MAIN);
-        lv_obj_set_style_text_font(cb, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(cb, gFontNormal, LV_PART_MAIN);
         lv_obj_set_style_bg_color(cb, gTheme->primaryDark, LV_PART_INDICATOR);
         lv_obj_set_style_bg_color(cb, gTheme->primary, LV_PART_INDICATOR | LV_STATE_CHECKED);
         lv_obj_set_style_border_color(cb, gTheme->textSoft, LV_PART_INDICATOR);
@@ -256,7 +278,7 @@ private:
         lv_obj_t* sectionTitle = lv_label_create(card);
         lv_label_set_text(sectionTitle, LV_SYMBOL_SETTINGS " System");
         lv_obj_set_style_text_color(sectionTitle, gTheme->primary, LV_PART_MAIN);
-        lv_obj_set_style_text_font(sectionTitle, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(sectionTitle, gFontIcon, LV_PART_MAIN);
 
         _makeSeparator(card);
 
@@ -266,7 +288,7 @@ private:
         _ramLabel = lv_label_create(rowRam);
         lv_label_set_text(_ramLabel, "-- KB");
         lv_obj_set_style_text_color(_ramLabel, gTheme->textSoft, LV_PART_MAIN);
-        lv_obj_set_style_text_font(_ramLabel, &lv_font_montserrat_10, LV_PART_MAIN);
+        lv_obj_set_style_text_font(_ramLabel, gFontSmall, LV_PART_MAIN);
         lv_obj_align(_ramLabel, LV_ALIGN_RIGHT_MID, 0, 0);
 
         // Bar showing RAM usage as a filled indicator
@@ -297,7 +319,7 @@ private:
         lv_obj_t* sectionTitle = lv_label_create(card);
         lv_label_set_text(sectionTitle, LV_SYMBOL_WARNING " Danger zone");
         lv_obj_set_style_text_color(sectionTitle, gTheme->errorText, LV_PART_MAIN);
-        lv_obj_set_style_text_font(sectionTitle, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(sectionTitle, gFontIcon, LV_PART_MAIN);
 
         _makeSeparator(card);
 
@@ -315,7 +337,7 @@ private:
         lv_obj_t* btnLbl = lv_label_create(btnReset);
         lv_label_set_text(btnLbl, LV_SYMBOL_TRASH " Reset to factory defaults");
         lv_obj_set_style_text_color(btnLbl, gTheme->errorText, LV_PART_MAIN);
-        lv_obj_set_style_text_font(btnLbl, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(btnLbl, gFontIcon, LV_PART_MAIN);
         lv_obj_center(btnLbl);
     }
 
@@ -355,7 +377,7 @@ private:
         lv_obj_t* lbl = lv_label_create(row);
         lv_label_set_text(lbl, labelText);
         lv_obj_set_style_text_color(lbl, gTheme->textDark, LV_PART_MAIN);
-        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(lbl, gFontNormal, LV_PART_MAIN);
         lv_obj_align(lbl, LV_ALIGN_LEFT_MID, 0, 0);
 
         return row;
@@ -373,13 +395,13 @@ private:
         lv_obj_t* keyLbl = lv_label_create(row);
         lv_label_set_text(keyLbl, key);
         lv_obj_set_style_text_color(keyLbl, gTheme->textSoft, LV_PART_MAIN);
-        lv_obj_set_style_text_font(keyLbl, &lv_font_montserrat_10, LV_PART_MAIN);
+        lv_obj_set_style_text_font(keyLbl, gFontSmall, LV_PART_MAIN);
         lv_obj_align(keyLbl, LV_ALIGN_LEFT_MID, 0, 0);
 
         lv_obj_t* valLbl = lv_label_create(row);
         lv_label_set_text(valLbl, val);
         lv_obj_set_style_text_color(valLbl, gTheme->textDark, LV_PART_MAIN);
-        lv_obj_set_style_text_font(valLbl, &lv_font_montserrat_10, LV_PART_MAIN);
+        lv_obj_set_style_text_font(valLbl, gFontSmall, LV_PART_MAIN);
         lv_obj_align(valLbl, LV_ALIGN_RIGHT_MID, 0, 0);
     }
 

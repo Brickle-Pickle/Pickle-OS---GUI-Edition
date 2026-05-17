@@ -70,7 +70,7 @@ private:
         lv_obj_t* name = lv_label_create(card);
         lv_label_set_text(name, "Pickle OS");
         lv_obj_set_style_text_color(name, gTheme->primary, LV_PART_MAIN);
-        lv_obj_set_style_text_font(name, &lv_font_montserrat_18, LV_PART_MAIN);
+        lv_obj_set_style_text_font(name, gFontLarge, LV_PART_MAIN);
 
         lv_obj_t* edition = lv_label_create(card);
         lv_label_set_text(edition, "GUI Edition");
@@ -89,10 +89,8 @@ private:
             { "Display", "ST7789 2.8\" 240x320" },
             { "Touch", "XPT2046 resistive" },
             { "GUI", "LVGL 8.3" },
-            { "RTOS", "FreeRTOS" },
             { "Author", "Brickle Pickle" },
             { "Dev", "Antonio G." },
-            { "CLI version", "Pickle OS" },
         };
 
         for (auto& r : rows) {
@@ -106,13 +104,13 @@ private:
             lv_obj_t* key = lv_label_create(rowObj);
             lv_label_set_text(key, r.key);
             lv_obj_set_style_text_color(key, gTheme->textSoft, LV_PART_MAIN);
-            lv_obj_set_style_text_font(key, &lv_font_montserrat_10, LV_PART_MAIN);
+            lv_obj_set_style_text_font(key, gFontSmall, LV_PART_MAIN);
             lv_obj_align(key, LV_ALIGN_LEFT_MID, 0, 0);
 
             lv_obj_t* val = lv_label_create(rowObj);
             lv_label_set_text(val, r.val);
             lv_obj_set_style_text_color(val, gTheme->textDark, LV_PART_MAIN);
-            lv_obj_set_style_text_font(val, &lv_font_montserrat_10, LV_PART_MAIN);
+            lv_obj_set_style_text_font(val, gFontSmall, LV_PART_MAIN);
             lv_obj_align(val, LV_ALIGN_RIGHT_MID, 0, 0);
         }
     }

@@ -21,6 +21,9 @@ void launchAbout() {
     ScreenManager::getInstance().navigateTo(
         new AboutScreen(), LV_SCR_LOAD_ANIM_FADE_ON);
 }
+void resetToHome() {
+    ScreenManager::getInstance().replaceRoot(new HomeScreen());
+}
 
 // Pinout and constants
 #define TOUCH_CS_PIN  33
@@ -129,8 +132,9 @@ void setup() {
     // Initialize Toast Manager
     ToastManager::getInstance().init();
 
-    // Load persisted theme before building any screen
+    // Load persisted theme and font before building any screen
     loadTheme();
+    loadFont();
 
     // Start Screen Manager with HomeScreen
     ScreenManager::getInstance().navigateTo(

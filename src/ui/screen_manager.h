@@ -42,6 +42,12 @@ public:
     void goHome(lv_scr_load_anim_t anim = LV_SCR_LOAD_ANIM_FADE_ON,
                 uint32_t animTime = 250);
 
+    // Destroy the entire stack and start fresh with a new root screen.
+    // Use this after theme/font changes so new widgets pick up the updated styles.
+    void replaceRoot(ScreenBase* screen,
+                     lv_scr_load_anim_t anim = LV_SCR_LOAD_ANIM_FADE_ON,
+                     uint32_t animTime = 250);
+
     // Replace the current screen without stacking (without return history).
     void replaceCurrent(ScreenBase* screen,
                         lv_scr_load_anim_t anim = LV_SCR_LOAD_ANIM_FADE_ON,
