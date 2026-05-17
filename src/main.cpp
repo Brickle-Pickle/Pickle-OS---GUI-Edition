@@ -6,6 +6,7 @@
 
 // Screen Manager and screens
 #include "ui/screen_manager.h"
+#include "ui/toast_manager.h"
 #include "ui/screens/home_screen.h"
 #include "ui/screens/about_screen.h"
 #include "ui/screens/settings_screen.h"
@@ -123,6 +124,9 @@ void setup() {
     indev_drv.type    = LV_INDEV_TYPE_POINTER;
     indev_drv.read_cb = readTouch;
     lv_indev_drv_register(&indev_drv);
+
+    // Initialize Toast Manager
+    ToastManager::getInstance().init();
 
     // Start Screen Manager with HomeScreen
     ScreenManager::getInstance().navigateTo(

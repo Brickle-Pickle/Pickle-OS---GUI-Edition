@@ -2,7 +2,7 @@
 #include "screen_base.h"
 #include "../screen_manager.h"
 
-#define VERSION "v0.1.0"
+#define VERSION "v0.1.3"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -78,13 +78,25 @@ private:
             extern void launchAbout();
             launchAbout();
         };
+        static auto cbAlerts = [](lv_event_t* e) {
+            ToastManager::getInstance().showToast("Alerts comming soon!");
+        };
+        static auto cbWiFi = [](lv_event_t* e) {
+            ToastManager::getInstance().showToast("WiFi coming soon!");
+        };
+        static auto cbFiles = [](lv_event_t* e) {
+            ToastManager::getInstance().showToast("File manager coming soon!");
+        };
+        static auto cbGames = [](lv_event_t* e) {
+            ToastManager::getInstance().showToast("Games coming soon!");
+        };
 
         const AppIcon apps[] = {
             { LV_SYMBOL_SETTINGS, "Settings", cbSettings },
-            { LV_SYMBOL_WIFI, "WiFi", nullptr },
-            { LV_SYMBOL_SD_CARD, "Files", nullptr },
-            { LV_SYMBOL_BELL, "Alerts", nullptr },
-            { LV_SYMBOL_PLAY, "Games", nullptr },
+            { LV_SYMBOL_WIFI, "WiFi", cbWiFi },
+            { LV_SYMBOL_SD_CARD, "Files", cbFiles },
+            { LV_SYMBOL_BELL, "Alerts", cbAlerts },
+            { LV_SYMBOL_PLAY, "Games", cbGames },
             { LV_SYMBOL_LIST, "About", cbAbout },
         };
 

@@ -76,7 +76,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 **User Interface**
 - [X] Design app launcher with touch-friendly icon grid
 - [X] Build on-screen keyboard (QWERTY + numeric layouts)
-- [ ] Implement toast notification system
+- [X] Implement toast notification system
 - [ ] Create custom visual theme (colors, fonts, icons)
 
 **Milestone**: Device boots with fluid touchscreen UI. First demonstrable version for portfolio.
