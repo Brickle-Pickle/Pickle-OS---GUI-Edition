@@ -94,10 +94,10 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 - [ ] HTTP/HTTPS client library integration
 
 **Storage & Apps**
-- [ ] SD card FAT32 file system support
-- [ ] Settings app with persistent configuration
+- [X] SD card FAT32 file system support
+- [X] Settings app with persistent configuration
 - [ ] Clock app (digital/analog with calendar view)
-- [ ] Notepad app (text editor with SD save/load)
+- [X] Notepad app (text editor with SD save/load)
 
 **Milestone**: OS connects to WiFi, supports OTA updates, and has functional SD storage with productivity apps.
 

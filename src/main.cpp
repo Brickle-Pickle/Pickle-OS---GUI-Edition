@@ -12,6 +12,11 @@
 #include "ui/screens/about_screen.h"
 #include "ui/screens/settings_screen.h"
 #include "ui/screens/splash_screen.h"
+#include "ui/screens/files_screen.h"
+
+// Storage manager
+#include "storage/fs_manager.h"
+#include "storage/sd_manager.h"
 
 // Launchers
 void launchSettings() {
@@ -21,6 +26,10 @@ void launchSettings() {
 void launchAbout() {
     ScreenManager::getInstance().navigateTo(
         new AboutScreen(), LV_SCR_LOAD_ANIM_FADE_ON);
+}
+void launchFiles() {
+    ScreenManager::getInstance().navigateTo(
+        new FilesScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
 }
 void resetToHome() {
     ScreenManager::getInstance().replaceRoot(new HomeScreen());
@@ -40,6 +49,7 @@ void resetToHome() {
 // Global objects
 TFT_eSPI tft = TFT_eSPI();
 XPT2046_Touchscreen touch(TOUCH_CS_PIN, TOUCH_IRQ_PIN);
+SPIClass sdSPI(HSPI);  // HSPI free for SD; VSPI is used by display+touch
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[LV_BUF_SIZE];
@@ -107,8 +117,10 @@ void setup() {
     pinMode(TFT_BL, OUTPUT);
     digitalWrite(TFT_BL, HIGH);
 
-    // Touchscreen initialization on own SPI bus
-    SPI.begin(25, 39, 32, TOUCH_CS_PIN);
+    // Configure VSPI for the touch FIRST. SPIClass::begin() is a no-op if the bus
+    // was already started, so we must set the CYD touch pins before touch.begin()
+    // triggers its internal SPI.begin() (which would lock VSPI to default pins).
+    SPI.begin(25, 39, 32);
     touch.begin();
     touch.setRotation(0);
 
@@ -129,9 +141,44 @@ void setup() {
     indev_drv.type    = LV_INDEV_TYPE_POINTER;
     indev_drv.read_cb = readTouch;
     lv_indev_drv_register(&indev_drv);
-
+    
     // Initialize Toast Manager
     ToastManager::getInstance().init();
+
+    // Initialize SD card on HSPI (pins 18/19/23) to avoid clobbering VSPI touch config
+    sdSPI.begin(18, 19, 23, 5);  // CLK, MISO, MOSI, CS
+    SDManager::getInstance().init(5, sdSPI);
+
+    // Make sure the main path ("/pickle-os") exists on SD card for file operations
+    if (!SDManager::getInstance().exists("/pickle-os")) {
+        SDManager::getInstance().makeDir("/pickle-os");
+    }
+
+    // Check for settings file on the SD card to load Brightness, wifi credentials, host...
+    if (!SDManager::getInstance().exists("/pickle-os/sys")) {
+        SDManager::getInstance().makeDir("/pickle-os/sys");
+    }
+    if (SDManager::getInstance().exists("/pickle-os/sys/config.txt")) {
+        // String config = SDManager::getInstance().readFile("/pickle-os/config.txt");
+        // Serial.println("[Pickle OS] Loaded config:\n" + config);
+    } else {
+        // Create file with defaults
+        SDManager::getInstance().writeFile(
+            "/pickle-os/sys/config.txt",
+            "brightness=255\n"
+            "wifi_ssid=\n"
+            "wifi_pass=\n"
+            "hostname=pickle-os\n"
+        );
+        Serial.println("[Pickle OS] No config file found, using defaults.");
+    }
+
+    if (SDManager::getInstance().isMounted()) {
+        Serial.println("[Pickle OS] SD card mounted successfully.");
+    } else {
+        Serial.println("[Pickle OS] Warning: SD card failed to mount.");
+        ToastManager::getInstance().showToast("SD card failed to mount!", ToastType::ALERT);
+    }
 
     // Load persisted theme and font before building any screen
     loadTheme();

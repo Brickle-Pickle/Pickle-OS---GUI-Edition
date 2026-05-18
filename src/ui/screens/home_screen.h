@@ -4,7 +4,7 @@
 #include "../toast/toast_manager.h"
 #include "../theme/theme.h"
 
-#define VERSION "v0.1.6"
+#define VERSION "v0.1.7"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -87,7 +87,8 @@ private:
             ToastManager::getInstance().showIconToast("WiFi coming soon!", LV_SYMBOL_WIFI, ToastType::SUCCESS);
         };
         static auto cbFiles = [](lv_event_t* e) {
-            ToastManager::getInstance().showIconToast("File manager coming soon!", LV_SYMBOL_SD_CARD, ToastType::ERROR);
+            extern void launchFiles();
+            launchFiles();
         };
         static auto cbGames = [](lv_event_t* e) {
             ToastManager::getInstance().showToast("Games coming soon!");
