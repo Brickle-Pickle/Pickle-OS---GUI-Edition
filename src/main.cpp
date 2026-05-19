@@ -13,10 +13,15 @@
 #include "ui/screens/settings_screen.h"
 #include "ui/screens/splash_screen.h"
 #include "ui/screens/files_screen.h"
+#include "ui/screens/wifi_screen.h"
 
 // Storage manager
 #include "storage/fs_manager.h"
 #include "storage/sd_manager.h"
+#include "storage/config_store.h"
+
+// Network
+#include "network/wifi_manager.h"
 
 // Launchers
 void launchSettings() {
@@ -30,6 +35,10 @@ void launchAbout() {
 void launchFiles() {
     ScreenManager::getInstance().navigateTo(
         new FilesScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
+}
+void launchWifi() {
+    ScreenManager::getInstance().navigateTo(
+        new WifiScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
 }
 void resetToHome() {
     ScreenManager::getInstance().replaceRoot(new HomeScreen());
@@ -158,20 +167,20 @@ void setup() {
     if (!SDManager::getInstance().exists("/pickle-os/sys")) {
         SDManager::getInstance().makeDir("/pickle-os/sys");
     }
-    if (SDManager::getInstance().exists("/pickle-os/sys/config.txt")) {
-        // String config = SDManager::getInstance().readFile("/pickle-os/config.txt");
-        // Serial.println("[Pickle OS] Loaded config:\n" + config);
-    } else {
+    if (!SDManager::getInstance().exists("/pickle-os/sys/config.txt")) {
         // Create file with defaults
         SDManager::getInstance().writeFile(
             "/pickle-os/sys/config.txt",
             "brightness=255\n"
             "wifi_ssid=\n"
             "wifi_pass=\n"
+            "wifi_enabled=0\n"
             "hostname=pickle-os\n"
         );
         Serial.println("[Pickle OS] No config file found, using defaults.");
     }
+    // Load config into memory so WifiManager (and future modules) can read it
+    ConfigStore::getInstance().load();
 
     if (SDManager::getInstance().isMounted()) {
         Serial.println("[Pickle OS] SD card mounted successfully.");
@@ -183,6 +192,10 @@ void setup() {
     // Load persisted theme and font before building any screen
     loadTheme();
     loadFont();
+
+    // Initialize WiFi — loads saved credentials and auto-connects if enabled.
+    // On successful connection, WifiManager triggers an NTP sync automatically.
+    WifiManager::getInstance().begin();
 
     // Start with SplashScreen, auto-navigates to HomeScreen after 2.5s
     ScreenManager::getInstance().navigateTo(

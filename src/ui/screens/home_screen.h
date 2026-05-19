@@ -3,8 +3,9 @@
 #include "../screen_manager.h"
 #include "../toast/toast_manager.h"
 #include "../theme/theme.h"
+#include "../../network/wifi_manager.h"
 
-#define VERSION "v0.1.7"
+#define VERSION "v0.2.0"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -30,6 +31,10 @@ public:
     }
 
     void onDestroy() override {
+        if (_clockTimer) {
+            lv_timer_del(_clockTimer);
+            _clockTimer = nullptr;
+        }
         if (_screen) {
             lv_obj_del(_screen);
             _screen = nullptr;
@@ -37,7 +42,8 @@ public:
     }
 
 private:
-    lv_obj_t* _clockLabel = nullptr;
+    lv_obj_t*   _clockLabel = nullptr;
+    lv_timer_t* _clockTimer = nullptr;
 
     // Header with OS name and clock
     void _buildHeader() {
@@ -55,11 +61,16 @@ private:
         lv_obj_set_style_text_color(title, gTheme->textDark, LV_PART_MAIN);
         lv_obj_align(title, LV_ALIGN_LEFT_MID, 8, 0);
 
-        // Clock (placeholder, updated on resume)
+        // Clock (real time once NTP has synced, "--:--" until then)
         _clockLabel = lv_label_create(header);
         lv_label_set_text(_clockLabel, "--:--");
         lv_obj_set_style_text_color(_clockLabel, gTheme->primary, LV_PART_MAIN);
         lv_obj_align(_clockLabel, LV_ALIGN_RIGHT_MID, -8, 0);
+
+        // Refresh the clock every 10s so the displayed time stays current
+        _clockTimer = lv_timer_create([](lv_timer_t* t) {
+            ((HomeScreen*)t->user_data)->_updateClock();
+        }, 10000, this);
     }
 
     // 2x3 grid of app icons
@@ -84,7 +95,8 @@ private:
             ToastManager::getInstance().showToast("Alerts comming soon!", ToastType::ALERT);
         };
         static auto cbWiFi = [](lv_event_t* e) {
-            ToastManager::getInstance().showIconToast("WiFi coming soon!", LV_SYMBOL_WIFI, ToastType::SUCCESS);
+            extern void launchWifi();
+            launchWifi();
         };
         static auto cbFiles = [](lv_event_t* e) {
             extern void launchFiles();
@@ -156,9 +168,12 @@ private:
     }
 
     void _updateClock() {
-        // Placeholder: when NTP is implemented, put the real time here
-        if (_clockLabel) {
-            lv_label_set_text(_clockLabel, "00:00");
-        }
+        if (!_clockLabel) return;
+        char hhmm[8];
+        getClockHHMM(hhmm, sizeof(hhmm));
+        // Skip the redraw entirely if the minute hasn't ticked over
+        const char* cur = lv_label_get_text(_clockLabel);
+        if (cur && strcmp(cur, hhmm) == 0) return;
+        lv_label_set_text(_clockLabel, hhmm);
     }
 };

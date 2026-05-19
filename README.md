@@ -88,9 +88,9 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 **Target**: WiFi-enabled OS with OTA updates and persistent storage
 
 **WiFi & Network**
-- [ ] WiFi manager app (scan, connect, save credentials to SD)
+- [X] WiFi manager app (scan, connect, save credentials to SD)
 - [ ] Over-the-air (OTA) firmware update system
-- [ ] NTP client for automatic time synchronization
+- [X] NTP client for automatic time synchronization
 - [ ] HTTP/HTTPS client library integration
 
 **Storage & Apps**

@@ -4,6 +4,8 @@
 #include "../screen_manager.h"
 #include "../keyboard_overlay.h"
 #include "../theme/theme.h"
+#include "../../network/wifi_manager.h"
+#include "../../storage/config_store.h"
 
 // SettingsScreen - System settings with all widget types demonstrated
 class SettingsScreen : public ScreenBase {
@@ -34,6 +36,8 @@ private:
     lv_obj_t* _ramLabel = nullptr;
     lv_obj_t* _scroll = nullptr;
     lv_obj_t* _taHostname = nullptr;
+    lv_obj_t* _taSsid = nullptr;
+    lv_obj_t* _taPass = nullptr;
     KeyboardOverlay _kb;
 
     // Header with back button and screen title
@@ -83,20 +87,37 @@ private:
         _buildSystemSection(_scroll);
         _buildDangerSection(_scroll);
 
-        // Keyboard: sits at screen bottom, shows when hostname textarea gains focus
+        // Keyboard: sits at screen bottom, shared between hostname/ssid/password textareas
         _kb.create(_screen);
-        _kb.linkTo(_taHostname);
 
-        lv_obj_add_event_cb(_taHostname, [](lv_event_t* e) {
+        auto onFocus = [](lv_event_t* e) {
             SettingsScreen* self = (SettingsScreen*)lv_event_get_user_data(e);
-            lv_obj_set_height(self->_scroll, 140); // shrink scroll above keyboard
+            lv_obj_t* ta = lv_event_get_target(e);
+            self->_kb.linkTo(ta);
+            lv_obj_set_height(self->_scroll, 140);
             self->_kb.show();
-            lv_obj_scroll_to_view(self->_taHostname, LV_ANIM_ON);
-        }, LV_EVENT_FOCUSED, this);
+            lv_obj_scroll_to_view(ta, LV_ANIM_ON);
+        };
+        lv_obj_add_event_cb(_taHostname, onFocus, LV_EVENT_FOCUSED, this);
+        lv_obj_add_event_cb(_taSsid,     onFocus, LV_EVENT_FOCUSED, this);
+        lv_obj_add_event_cb(_taPass,     onFocus, LV_EVENT_FOCUSED, this);
 
         // Hide keyboard and restore scroll on OK (✓) or Cancel (✕)
         auto hideKb = [](lv_event_t* e) {
             SettingsScreen* self = (SettingsScreen*)lv_event_get_user_data(e);
+            // Persist current WiFi credentials whenever the user accepts (✓).
+            // Empty password field means "keep the previously stored one" so the
+            // user can change only the SSID without re-typing the password.
+            if (lv_event_get_code(e) == LV_EVENT_READY) {
+                const char* newSsid = lv_textarea_get_text(self->_taSsid);
+                const char* newPass = lv_textarea_get_text(self->_taPass);
+                String pass = (newPass && *newPass)
+                    ? String(newPass)
+                    : WifiManager::getInstance().ssid().length() > 0
+                        ? ConfigStore::getInstance().get("wifi_pass")
+                        : String("");
+                WifiManager::getInstance().setCredentials(String(newSsid), pass);
+            }
             self->_kb.hide();
             lv_obj_set_height(self->_scroll, 280);
         };
@@ -198,18 +219,66 @@ private:
 
         _makeSeparator(card);
 
-        // WiFi enabled toggle
+        // WiFi enabled toggle - reflects and drives WifiManager state
         lv_obj_t* rowWifi = _makeRow(card, "WiFi enabled");
         lv_obj_t* swWifi = lv_switch_create(rowWifi);
         lv_obj_set_style_bg_color(swWifi, gTheme->primaryDark, LV_PART_MAIN);
         lv_obj_set_style_bg_color(swWifi, gTheme->primary, LV_PART_MAIN | LV_STATE_CHECKED);
         lv_obj_set_style_bg_color(swWifi, gTheme->textDark, LV_PART_KNOB);
-        lv_obj_add_state(swWifi, LV_STATE_CHECKED);
+        if (WifiManager::getInstance().enabled()) {
+            lv_obj_add_state(swWifi, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(swWifi, LV_STATE_CHECKED);
+        }
         lv_obj_align(swWifi, LV_ALIGN_RIGHT_MID, 0, 0);
         lv_obj_add_event_cb(swWifi, [](lv_event_t* e) {
             bool on = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
-            (void)on;
+            WifiManager::getInstance().setEnabled(on);
         }, LV_EVENT_VALUE_CHANGED, NULL);
+
+        _makeSeparator(card);
+
+        // SSID input
+        lv_obj_t* lblSsid = lv_label_create(card);
+        lv_label_set_text(lblSsid, "SSID");
+        lv_obj_set_style_text_color(lblSsid, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_text_font(lblSsid, gFontNormal, LV_PART_MAIN);
+
+        _taSsid = lv_textarea_create(card);
+        lv_obj_set_width(_taSsid, lv_pct(100));
+        lv_obj_set_height(_taSsid, 38);
+        lv_textarea_set_one_line(_taSsid, true);
+        lv_textarea_set_placeholder_text(_taSsid, "network name");
+        lv_textarea_set_max_length(_taSsid, 32);
+        lv_textarea_set_text(_taSsid, WifiManager::getInstance().ssid().c_str());
+        lv_obj_set_style_bg_color(_taSsid, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_text_color(_taSsid, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taSsid, gTheme->textSoft, LV_PART_MAIN);
+        lv_obj_set_style_border_width(_taSsid, 1, LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taSsid, gTheme->primary, LV_PART_MAIN | LV_STATE_FOCUSED);
+        lv_obj_set_style_radius(_taSsid, 8, LV_PART_MAIN);
+
+        _makeSeparator(card);
+
+        // Password input (masked)
+        lv_obj_t* lblPass = lv_label_create(card);
+        lv_label_set_text(lblPass, "Password");
+        lv_obj_set_style_text_color(lblPass, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_text_font(lblPass, gFontNormal, LV_PART_MAIN);
+
+        _taPass = lv_textarea_create(card);
+        lv_obj_set_width(_taPass, lv_pct(100));
+        lv_obj_set_height(_taPass, 38);
+        lv_textarea_set_one_line(_taPass, true);
+        lv_textarea_set_password_mode(_taPass, true);
+        lv_textarea_set_placeholder_text(_taPass, "password");
+        lv_textarea_set_max_length(_taPass, 64);
+        lv_obj_set_style_bg_color(_taPass, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_text_color(_taPass, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taPass, gTheme->textSoft, LV_PART_MAIN);
+        lv_obj_set_style_border_width(_taPass, 1, LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taPass, gTheme->primary, LV_PART_MAIN | LV_STATE_FOCUSED);
+        lv_obj_set_style_radius(_taPass, 8, LV_PART_MAIN);
 
         _makeSeparator(card);
 
