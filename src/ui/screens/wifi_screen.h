@@ -33,10 +33,10 @@ public:
     }
 
 private:
-    lv_obj_t*   _statusLabel = nullptr;
-    lv_obj_t*   _ssidLabel   = nullptr;
-    lv_obj_t*   _ipLabel     = nullptr;
-    lv_obj_t*   _clockLabel  = nullptr;
+    lv_obj_t* _statusLabel = nullptr;
+    lv_obj_t* _ssidLabel = nullptr;
+    lv_obj_t* _ipLabel = nullptr;
+    lv_obj_t* _clockLabel = nullptr;
     lv_timer_t* _statusTimer = nullptr;
 
     void _buildHeader() {
@@ -146,13 +146,13 @@ private:
         const char* statusText;
         lv_color_t  statusColor;
         if (!w.enabled()) {
-            statusText  = LV_SYMBOL_CLOSE " Disabled";
+            statusText = LV_SYMBOL_CLOSE " Disabled";
             statusColor = gTheme->errorText;
         } else if (w.connected()) {
-            statusText  = LV_SYMBOL_OK " Connected";
+            statusText = LV_SYMBOL_OK " Connected";
             statusColor = gTheme->successText;
         } else {
-            statusText  = LV_SYMBOL_REFRESH " Connecting...";
+            statusText = LV_SYMBOL_REFRESH " Connecting...";
             statusColor = gTheme->alertText;
         }
         if (strcmp(lv_label_get_text(_statusLabel), statusText) != 0) {

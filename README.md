@@ -96,7 +96,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 **Storage & Apps**
 - [X] SD card FAT32 file system support
 - [X] Settings app with persistent configuration
-- [ ] Clock app (digital/analog with calendar view)
+- [X] Clock app (digital/analog with calendar view)
 - [X] Notepad app (text editor with SD save/load)
 
 **Milestone**: OS connects to WiFi, supports OTA updates, and has functional SD storage with productivity apps.

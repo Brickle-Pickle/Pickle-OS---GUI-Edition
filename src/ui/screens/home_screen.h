@@ -5,7 +5,7 @@
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
 
-#define VERSION "v0.2.0"
+#define VERSION "v0.2.1"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -105,6 +105,10 @@ private:
         static auto cbGames = [](lv_event_t* e) {
             ToastManager::getInstance().showToast("Games coming soon!");
         };
+        static auto cbClock = [](lv_event_t* e) {
+            extern void launchClock();
+            launchClock();
+        };
 
         const AppIcon apps[] = {
             { LV_SYMBOL_SETTINGS, "Settings", cbSettings },
@@ -113,7 +117,9 @@ private:
             { LV_SYMBOL_BELL, "Alerts", cbAlerts },
             { LV_SYMBOL_PLAY, "Games", cbGames },
             { LV_SYMBOL_LIST, "About", cbAbout },
+            { LV_SYMBOL_LOOP, "Clock", cbClock },
         };
+        const int APP_COUNT = sizeof(apps) / sizeof(apps[0]);
 
         const int COLS = 3;
         const int ICON_SIZE = 64;
@@ -121,7 +127,7 @@ private:
         const int START_X = (240 - COLS * ICON_SIZE - (COLS - 1) * GAP) / 2;
         const int START_Y = 44;
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < APP_COUNT; i++) {
             int col = i % COLS;
             int row = i / COLS;
             int x = START_X + col * (ICON_SIZE + GAP);
