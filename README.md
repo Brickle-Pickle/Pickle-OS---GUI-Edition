@@ -84,7 +84,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 ---
 
 ### Phase 2: Connectivity & Storage (Months 3-4)
-**Status**: In progress  
+**Status**: Paused - Almost complete  
 **Target**: WiFi-enabled OS with OTA updates and persistent storage
 
 **WiFi & Network**
@@ -150,7 +150,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 ---
 
 ### Phase 5: Advanced Applications (Months 9-10)
-**Status**: Not started  
+**Status**: In progress  
 **Target**: IoT integration, games, and polished UX
 
 **Data & IoT**

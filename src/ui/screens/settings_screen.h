@@ -6,6 +6,7 @@
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
 #include "../../storage/config_store.h"
+#include "../brightness.h"
 
 // SettingsScreen - System settings with all widget types demonstrated
 class SettingsScreen : public ScreenBase {
@@ -141,7 +142,7 @@ private:
         // Brightness row: label on left, current value on right
         lv_obj_t* rowBrightness = _makeRow(card, "Brightness");
         _brightnessLabel = lv_label_create(rowBrightness);
-        lv_label_set_text(_brightnessLabel, "128");
+        lv_label_set_text_fmt(_brightnessLabel, "%d", (int)Brightness::value());
         lv_obj_set_style_text_color(_brightnessLabel, gTheme->textSoft, LV_PART_MAIN);
         lv_obj_set_style_text_font(_brightnessLabel, gFontSmall, LV_PART_MAIN);
         lv_obj_align(_brightnessLabel, LV_ALIGN_RIGHT_MID, 0, 0);
@@ -151,7 +152,7 @@ private:
         lv_obj_t* slider = lv_slider_create(card);
         lv_obj_set_width(slider, lv_pct(100));
         lv_slider_set_range(slider, 0, 255);
-        lv_slider_set_value(slider, 128, LV_ANIM_OFF);
+        lv_slider_set_value(slider, Brightness::value(), LV_ANIM_OFF);
         lv_obj_set_style_bg_color(slider, gTheme->primaryDark, LV_PART_MAIN);
         lv_obj_set_style_bg_color(slider, gTheme->primary, LV_PART_INDICATOR);
         lv_obj_set_style_bg_color(slider, gTheme->textDark, LV_PART_KNOB);
@@ -159,7 +160,12 @@ private:
             SettingsScreen* self = (SettingsScreen*)lv_event_get_user_data(e);
             int32_t val = lv_slider_get_value(lv_event_get_target(e));
             lv_label_set_text_fmt(self->_brightnessLabel, "%d", val);
+            Brightness::apply((uint8_t)val);
         }, LV_EVENT_VALUE_CHANGED, this);
+        lv_obj_add_event_cb(slider, [](lv_event_t* e) {
+            int32_t val = lv_slider_get_value(lv_event_get_target(e));
+            Brightness::save((uint8_t)val);
+        }, LV_EVENT_RELEASED, this);
 
         _makeSeparator(card);
 
@@ -374,7 +380,6 @@ private:
         _makeSeparator(card);
 
         // Static info rows: key on left, value on right, no interactive control
-        _makeInfoRow(card, "Firmware", "v0.1.0");
         _makeInfoRow(card, "LVGL", "8.3");
         _makeInfoRow(card, "Board", "ESP32-2432S028");
     }

@@ -15,6 +15,7 @@
 #include "ui/screens/files_screen.h"
 #include "ui/screens/wifi_screen.h"
 #include "ui/screens/clock_screen.h"
+#include "ui/brightness.h"
 
 // Storage manager
 #include "storage/fs_manager.h"
@@ -128,8 +129,7 @@ void setup() {
     tft.init();
     tft.setRotation(0);
     tft.fillScreen(TFT_BLACK);
-    pinMode(TFT_BL, OUTPUT);
-    digitalWrite(TFT_BL, HIGH);
+    Brightness::init();
 
     // Configure VSPI for the touch FIRST. SPIClass::begin() is a no-op if the bus
     // was already started, so we must set the CYD touch pins before touch.begin()
@@ -186,6 +186,9 @@ void setup() {
     }
     // Load config into memory so WifiManager (and future modules) can read it
     ConfigStore::getInstance().load();
+
+    // Apply persisted brightness now that config is in memory
+    Brightness::load();
 
     if (SDManager::getInstance().isMounted()) {
         Serial.println("[Pickle OS] SD card mounted successfully.");
