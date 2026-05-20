@@ -15,6 +15,7 @@
 #include "ui/screens/files_screen.h"
 #include "ui/screens/wifi_screen.h"
 #include "ui/screens/clock_screen.h"
+#include "ui/screens/games_screen.h"
 #include "ui/brightness.h"
 
 // Storage manager
@@ -45,6 +46,10 @@ void launchWifi() {
 void launchClock() {
     ScreenManager::getInstance().navigateTo(
         new ClockScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
+}
+void launchGames() {
+    ScreenManager::getInstance().navigateTo(
+        new GamesScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
 }
 void resetToHome() {
     ScreenManager::getInstance().replaceRoot(new HomeScreen());

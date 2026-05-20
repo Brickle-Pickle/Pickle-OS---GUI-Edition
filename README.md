@@ -159,12 +159,13 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 - [ ] RSS/news feed reader
 
 **Games & Entertainment**
-- [ ] Snake or Breakout game (touchscreen + gamepad support)
-- [ ] High score tracking (stored on SD card)
+- [X] Memory game (touch-based)
+- [ ] Snake game (BLE gamepad)
+- [X] High score tracking (stored on SD card)
 
 **User Experience**
 - [X] Dark/light theme toggle
-- [ ] Adaptive brightness control (optional photoresistor)
+- [X] Adaptive brightness control (optional photoresistor)
 - [ ] Lock screen with PIN code entry
 - [ ] Power saving mode with deep sleep
 

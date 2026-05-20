@@ -5,7 +5,7 @@
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
 
-#define VERSION "v0.2.2"
+#define VERSION "v0.2.3"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -103,7 +103,8 @@ private:
             launchFiles();
         };
         static auto cbGames = [](lv_event_t* e) {
-            ToastManager::getInstance().showToast("Games coming soon!");
+            extern void launchGames();
+            launchGames();
         };
         static auto cbClock = [](lv_event_t* e) {
             extern void launchClock();
