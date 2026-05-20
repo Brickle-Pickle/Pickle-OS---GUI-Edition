@@ -91,7 +91,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 - [X] WiFi manager app (scan, connect, save credentials to SD)
 - [ ] Over-the-air (OTA) firmware update system
 - [X] NTP client for automatic time synchronization
-- [ ] HTTP/HTTPS client library integration
+- [X  ] HTTP/HTTPS client library integration
 
 **Storage & Apps**
 - [X] SD card FAT32 file system support

@@ -5,7 +5,7 @@
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
 
-#define VERSION "v0.2.3"
+#define VERSION "v1.2.3"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;

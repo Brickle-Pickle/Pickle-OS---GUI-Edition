@@ -22,6 +22,7 @@
 #include "storage/fs_manager.h"
 #include "storage/sd_manager.h"
 #include "storage/config_store.h"
+#include "storage/game_installer.h"
 
 // Network
 #include "network/wifi_manager.h"
@@ -186,11 +187,15 @@ void setup() {
             "wifi_pass=\n"
             "wifi_enabled=0\n"
             "hostname=pickle-os\n"
+            "game_server=https://pickle-os-game-store.onrender.com\n"
         );
         Serial.println("[Pickle OS] No config file found, using defaults.");
     }
     // Load config into memory so WifiManager (and future modules) can read it
     ConfigStore::getInstance().load();
+
+    // Make sure the games-hub directory exists for downloaded games
+    GameInstaller::getInstance().ensureRoot();
 
     // Apply persisted brightness now that config is in memory
     Brightness::load();

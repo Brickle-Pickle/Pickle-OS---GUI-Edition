@@ -55,9 +55,15 @@ public:
 
     // Check if we can go back
     bool canGoBack() const { return _stack.size() > 1; }
-    
+
     // Get stack depth
-    int  stackDepth() const { return (int)_stack.size(); }
+    int stackDepth() const { return (int)_stack.size(); }
+
+    // Top of the stack, or nullptr when empty. Useful for modals that need to
+    // reach back into the screen that triggered them.
+    ScreenBase* currentScreen() const {
+        return _stack.empty() ? nullptr : _stack.back();
+    }
 
 private:
     ScreenManager() = default;
