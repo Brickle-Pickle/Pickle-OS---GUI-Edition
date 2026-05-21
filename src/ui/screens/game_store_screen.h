@@ -42,12 +42,25 @@ public:
     }
 
 private:
+    // Compact catalog entry. Built on the worker so the raw JSON can be freed
+    // before we touch LVGL, halving peak heap during the render step.
+    struct GameInfo {
+        String id;
+        String name;
+        String description;
+        String type;
+        String version;
+        String author;
+    };
+
     // Shared block lives on the heap so it survives the screen if the user
     // navigates away mid-fetch; the worker task frees it on exit.
     struct Shared {
         volatile bool job_done = false;
         volatile bool screen_alive = true;
-        String result;
+        // Set to true by the worker when the catalog fetch+parse succeeded.
+        bool catalogOk = false;
+        std::vector<GameInfo> catalog;
         // op zero is catalog, op one is install.
         int op = 0;
         String installId;
@@ -142,7 +155,41 @@ private:
     static void _workerTask(void* arg) {
         Shared* sh = (Shared*)arg;
         if (sh->op == 0) {
-            sh->result = GameApi::getInstance().fetchCatalog();
+            // Fetch and parse on the worker so the raw JSON String is released
+            // before the LVGL task starts building cards.
+            String raw = GameApi::getInstance().fetchCatalog();
+            sh->catalogOk = false;
+            if (raw.length()) {
+                JsonDocument filter;
+                filter["games"][0]["id"] = true;
+                filter["games"][0]["name"] = true;
+                filter["games"][0]["description"] = true;
+                filter["games"][0]["type"] = true;
+                filter["games"][0]["version"] = true;
+                filter["games"][0]["author"] = true;
+                JsonDocument doc;
+                DeserializationError err = deserializeJson(
+                    doc, raw, DeserializationOption::Filter(filter));
+                if (!err) {
+                    JsonArray games = doc["games"].as<JsonArray>();
+                    sh->catalog.reserve(games.size());
+                    for (JsonObject g : games) {
+                        GameInfo gi;
+                        gi.id = String((const char*)(g["id"] | ""));
+                        gi.name = String((const char*)(g["name"] | ""));
+                        gi.description = String((const char*)(g["description"] | ""));
+                        gi.type = String((const char*)(g["type"] | ""));
+                        gi.version = String((const char*)(g["version"] | ""));
+                        gi.author = String((const char*)(g["author"] | ""));
+                        sh->catalog.push_back(std::move(gi));
+                    }
+                    sh->catalogOk = true;
+                } else {
+                    Serial.printf("[GameStore] catalog parse error: %s\n", err.c_str());
+                }
+            }
+            // Drop the raw body before signaling so render runs with low heap.
+            raw = String();
         } else {
             // Install downloads the manifest, then the entry script declared
             // in the manifest (defaults to "game.lua").
@@ -187,7 +234,8 @@ private:
         if (_shared) { delete _shared; _shared = nullptr; }
         _shared = new Shared();
         _shared->op = 0;
-        xTaskCreatePinnedToCore(_workerTask, "store-fetch", 12288, _shared, 1, nullptr, 0);
+        // 20 KB: TLS handshake plus ArduinoJson stream parse comfortably fit.
+        xTaskCreatePinnedToCore(_workerTask, "store-fetch", 20480, _shared, 1, nullptr, 0);
         _cancelTimer();
         _pollTmr = lv_timer_create([](lv_timer_t* t) {
             ((GameStoreScreen*)t->user_data)->_pollCatalog();
@@ -198,31 +246,35 @@ private:
         if (!_shared || !_shared->job_done) return;
         _cancelTimer();
 
-        if (!_shared->result.length()) {
+        if (!_shared->catalogOk) {
             _clearList();
             _showStatus("Failed to reach server.");
             delete _shared; _shared = nullptr;
             return;
         }
-        _renderCatalog(_shared->result);
+        _renderCatalog(_shared->catalog);
         delete _shared; _shared = nullptr;
     }
 
-    void _renderCatalog(const String& json) {
+    void _renderCatalog(const std::vector<GameInfo>& games) {
         _clearList();
-        JsonDocument doc;
-        DeserializationError err = deserializeJson(doc, json);
-        if (err) {
-            _showStatus("Bad JSON from server.");
-            return;
-        }
-        JsonArray games = doc["games"].as<JsonArray>();
-        if (games.size() == 0) {
+        if (games.empty()) {
             _showStatus("No games available.");
             return;
         }
-        for (JsonObject g : games) {
-            _addCard(g);
+        size_t rendered = 0;
+        for (const GameInfo& g : games) {
+            if (!_addCard(g)) break; // LVGL pool exhausted, stop gracefully
+            rendered++;
+        }
+        if (rendered < games.size()) {
+            lv_obj_t* more = lv_label_create(_list);
+            if (more) {
+                lv_label_set_text_fmt(more, "+%u more (low memory)",
+                                      (unsigned)(games.size() - rendered));
+                lv_obj_set_style_text_color(more, gTheme->textSoft, LV_PART_MAIN);
+                lv_obj_set_style_text_font(more, gFontSmall, LV_PART_MAIN);
+            }
         }
     }
 
@@ -235,19 +287,22 @@ private:
         return LV_SYMBOL_PLAY;
     }
 
-    void _addCard(JsonObject g) {
-        String id = String((const char*)(g["id"] | ""));
-        String name = String((const char*)(g["name"] | ""));
-        String desc = String((const char*)(g["description"] | ""));
-        String type = String((const char*)(g["type"] | ""));
-        String ver = String((const char*)(g["version"] | ""));
-        String author = String((const char*)(g["author"] | ""));
+    // Returns false if LVGL ran out of memory while building the card, so the
+    // caller can stop iterating instead of crashing on a NULL deref.
+    bool _addCard(const GameInfo& g) {
+        const String& id = g.id;
+        const String& name = g.name;
+        const String& desc = g.description;
+        const String& type = g.type;
+        const String& ver = g.version;
+        const String& author = g.author;
         bool installed = GameInstaller::getInstance().isInstalled(id);
 
         // Layout: 220x100 card with a colored icon strip on the left, two
         // text rows on top, the description in the middle and the action
         // button anchored bottom-right.
         lv_obj_t* card = lv_obj_create(_list);
+        if (!card) return false;
         lv_obj_set_size(card, 220, 100);
         lv_obj_set_style_bg_color(card, gTheme->backgroundPopup, LV_PART_MAIN);
         lv_obj_set_style_border_width(card, 0, LV_PART_MAIN);
@@ -347,6 +402,7 @@ private:
             char* p = (char*)lv_obj_get_user_data(lv_event_get_target(e));
             if (p) free(p);
         }, LV_EVENT_DELETE, nullptr);
+        return true;
     }
 
     void _startInstall(const String& id) {

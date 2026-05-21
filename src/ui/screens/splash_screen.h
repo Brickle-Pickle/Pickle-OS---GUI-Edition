@@ -3,6 +3,7 @@
 #include "../screen_manager.h"
 #include "../theme/theme.h"
 #include "home_screen.h"
+#include "pin_lock_screen.h"
 
 #define SPLASH_DURATION_MS 2500
 
@@ -65,7 +66,11 @@ private:
         // Null the pointer NOW: LVGL will auto-delete the timer when this callback returns
         // (repeat_count=1). If we don't null it, onDestroy() called below would double-free it.
         self->_timer = nullptr;
-        // replaceCurrent removes the splash from the nav stack so goBack() can't return to it
-        ScreenManager::getInstance().replaceCurrent(new HomeScreen());
+        // replaceCurrent removes the splash from the nav stack so goBack() can't return to it.
+        // If the user has configured a device PIN, gate access through the lock screen.
+        ScreenBase* next = PinLockScreen::hasPin()
+            ? (ScreenBase*)new PinLockScreen()
+            : (ScreenBase*)new HomeScreen();
+        ScreenManager::getInstance().replaceCurrent(next);
     }
 };

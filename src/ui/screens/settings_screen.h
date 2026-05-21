@@ -7,6 +7,7 @@
 #include "../../network/wifi_manager.h"
 #include "../../storage/config_store.h"
 #include "../brightness.h"
+#include "pin_lock_screen.h"
 
 // SettingsScreen - System settings with all widget types demonstrated
 class SettingsScreen : public ScreenBase {
@@ -39,6 +40,8 @@ private:
     lv_obj_t* _taHostname = nullptr;
     lv_obj_t* _taSsid = nullptr;
     lv_obj_t* _taPass = nullptr;
+    lv_obj_t* _taPin = nullptr;
+    lv_obj_t* _pinStatus = nullptr;
     KeyboardOverlay _kb;
 
     // Header with back button and screen title
@@ -85,6 +88,7 @@ private:
 
         _buildDisplaySection(_scroll);
         _buildConnectivitySection(_scroll);
+        _buildSecuritySection(_scroll);
         _buildSystemSection(_scroll);
         _buildDangerSection(_scroll);
 
@@ -96,12 +100,17 @@ private:
             lv_obj_t* ta = lv_event_get_target(e);
             self->_kb.linkTo(ta);
             lv_obj_set_height(self->_scroll, 140);
-            self->_kb.show();
+            if (ta == self->_taPin) {
+                self->_kb.showNumeric();
+            } else {
+                self->_kb.show();
+            }
             lv_obj_scroll_to_view(ta, LV_ANIM_ON);
         };
         lv_obj_add_event_cb(_taHostname, onFocus, LV_EVENT_FOCUSED, this);
         lv_obj_add_event_cb(_taSsid,     onFocus, LV_EVENT_FOCUSED, this);
         lv_obj_add_event_cb(_taPass,     onFocus, LV_EVENT_FOCUSED, this);
+        lv_obj_add_event_cb(_taPin,      onFocus, LV_EVENT_FOCUSED, this);
 
         // Hide keyboard and restore scroll on OK (✓) or Cancel (✕)
         auto hideKb = [](lv_event_t* e) {
@@ -110,14 +119,25 @@ private:
             // Empty password field means "keep the previously stored one" so the
             // user can change only the SSID without re-typing the password.
             if (lv_event_get_code(e) == LV_EVENT_READY) {
-                const char* newSsid = lv_textarea_get_text(self->_taSsid);
-                const char* newPass = lv_textarea_get_text(self->_taPass);
-                String pass = (newPass && *newPass)
-                    ? String(newPass)
-                    : WifiManager::getInstance().ssid().length() > 0
-                        ? ConfigStore::getInstance().get("wifi_pass")
-                        : String("");
-                WifiManager::getInstance().setCredentials(String(newSsid), pass);
+                lv_obj_t* linked = lv_keyboard_get_textarea(self->_kb.obj());
+                if (linked == self->_taPin) {
+                    const char* newPin = lv_textarea_get_text(self->_taPin);
+                    if (newPin && *newPin) {
+                        PinLockScreen::savePin(String(newPin));
+                        lv_label_set_text(self->_pinStatus, "PIN set");
+                        lv_obj_set_style_text_color(self->_pinStatus, gTheme->primary, LV_PART_MAIN);
+                    }
+                    lv_textarea_set_text(self->_taPin, "");
+                } else {
+                    const char* newSsid = lv_textarea_get_text(self->_taSsid);
+                    const char* newPass = lv_textarea_get_text(self->_taPass);
+                    String pass = (newPass && *newPass)
+                        ? String(newPass)
+                        : WifiManager::getInstance().ssid().length() > 0
+                            ? ConfigStore::getInstance().get("wifi_pass")
+                            : String("");
+                    WifiManager::getInstance().setCredentials(String(newSsid), pass);
+                }
             }
             self->_kb.hide();
             lv_obj_set_height(self->_scroll, 280);
@@ -382,6 +402,73 @@ private:
         // Static info rows: key on left, value on right, no interactive control
         _makeInfoRow(card, "LVGL", "8.3");
         _makeInfoRow(card, "Board", "ESP32-2432S028");
+    }
+
+    // Section: Security
+    // Contains: PIN status label, masked numeric textarea, remove-PIN button.
+    // The PIN is stored in NVS (internal flash) so it survives SD card removal.
+    void _buildSecuritySection(lv_obj_t* parent) {
+        lv_obj_t* card = _makeCard(parent);
+
+        lv_obj_t* sectionTitle = lv_label_create(card);
+        lv_label_set_text(sectionTitle, LV_SYMBOL_KEYBOARD " Security");
+        lv_obj_set_style_text_color(sectionTitle, gTheme->primary, LV_PART_MAIN);
+        lv_obj_set_style_text_font(sectionTitle, gFontIcon, LV_PART_MAIN);
+
+        _makeSeparator(card);
+
+        // Status row: shows whether a PIN is currently configured.
+        lv_obj_t* rowStatus = _makeRow(card, "Device PIN");
+        _pinStatus = lv_label_create(rowStatus);
+        bool hasPin = PinLockScreen::hasPin();
+        lv_label_set_text(_pinStatus, hasPin ? "PIN set" : "Not set");
+        lv_obj_set_style_text_color(_pinStatus, hasPin ? gTheme->primary : gTheme->textSoft, LV_PART_MAIN);
+        lv_obj_set_style_text_font(_pinStatus, gFontSmall, LV_PART_MAIN);
+        lv_obj_align(_pinStatus, LV_ALIGN_RIGHT_MID, 0, 0);
+
+        _makeSeparator(card);
+
+        // Label above the input.
+        lv_obj_t* lblPin = lv_label_create(card);
+        lv_label_set_text(lblPin, "New PIN");
+        lv_obj_set_style_text_color(lblPin, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_text_font(lblPin, gFontNormal, LV_PART_MAIN);
+
+        // Numeric, masked input. Press OK on the keyboard to save.
+        _taPin = lv_textarea_create(card);
+        lv_obj_set_width(_taPin, lv_pct(100));
+        lv_obj_set_height(_taPin, 38);
+        lv_textarea_set_one_line(_taPin, true);
+        lv_textarea_set_password_mode(_taPin, true);
+        lv_textarea_set_placeholder_text(_taPin, "digits only");
+        lv_textarea_set_max_length(_taPin, 16);
+        lv_obj_set_style_bg_color(_taPin, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_text_color(_taPin, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taPin, gTheme->textSoft, LV_PART_MAIN);
+        lv_obj_set_style_border_width(_taPin, 1, LV_PART_MAIN);
+        lv_obj_set_style_border_color(_taPin, gTheme->primary, LV_PART_MAIN | LV_STATE_FOCUSED);
+        lv_obj_set_style_radius(_taPin, 8, LV_PART_MAIN);
+
+        _makeSeparator(card);
+
+        // Remove button: wipes the PIN from NVS so the lock screen is skipped.
+        lv_obj_t* btnRemove = lv_btn_create(card);
+        lv_obj_set_width(btnRemove, lv_pct(100));
+        lv_obj_set_height(btnRemove, 32);
+        lv_obj_set_style_bg_color(btnRemove, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_radius(btnRemove, 8, LV_PART_MAIN);
+        lv_obj_add_event_cb(btnRemove, [](lv_event_t* e) {
+            SettingsScreen* self = (SettingsScreen*)lv_event_get_user_data(e);
+            PinLockScreen::clearPin();
+            lv_label_set_text(self->_pinStatus, "Not set");
+            lv_obj_set_style_text_color(self->_pinStatus, gTheme->textSoft, LV_PART_MAIN);
+        }, LV_EVENT_CLICKED, this);
+
+        lv_obj_t* btnLbl = lv_label_create(btnRemove);
+        lv_label_set_text(btnLbl, "Remove PIN");
+        lv_obj_set_style_text_color(btnLbl, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_text_font(btnLbl, gFontNormal, LV_PART_MAIN);
+        lv_obj_center(btnLbl);
     }
 
     // Section: Danger zone

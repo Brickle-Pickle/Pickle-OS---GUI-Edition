@@ -166,7 +166,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 **User Experience**
 - [X] Dark/light theme toggle
 - [X] Adaptive brightness control (optional photoresistor)
-- [ ] Lock screen with PIN code entry
+- [X] Lock screen with PIN code entry
 - [ ] Power saving mode with deep sleep
 
 **Milestone**: Feature-complete system with useful apps, games, and professional polish.
