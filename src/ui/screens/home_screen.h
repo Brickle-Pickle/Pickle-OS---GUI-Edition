@@ -110,6 +110,10 @@ private:
             extern void launchClock();
             launchClock();
         };
+        static auto cbModules = [](lv_event_t* e) {
+            extern void launchModules();
+            launchModules();
+        };
 
         const AppIcon apps[] = {
             { LV_SYMBOL_SETTINGS, "Settings", cbSettings },
@@ -119,6 +123,7 @@ private:
             { LV_SYMBOL_PLAY, "Games", cbGames },
             { LV_SYMBOL_LIST, "About", cbAbout },
             { LV_SYMBOL_LOOP, "Clock", cbClock },
+            { LV_SYMBOL_USB, "Modules", cbModules },
         };
         const int APP_COUNT = sizeof(apps) / sizeof(apps[0]);
 

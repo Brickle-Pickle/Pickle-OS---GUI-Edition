@@ -137,7 +137,7 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 - [ ] RFID manager app (read/write tags, store history on SD)
 
 **Temperature/Humidity Module**
-- [ ] DHT22/SHT30 driver (GPIO/I2C on P3 pins)
+- [X] AHT10/SHT30 driver (GPIO/I2C on P3 pins)
 - [ ] Environmental sensor app (real-time graphs, SD logging)
 
 **Hardware Design**

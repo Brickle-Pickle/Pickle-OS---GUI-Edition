@@ -16,7 +16,12 @@
 #include "ui/screens/wifi_screen.h"
 #include "ui/screens/clock_screen.h"
 #include "ui/screens/games_screen.h"
+#include "ui/screens/modules_screen.h"
 #include "ui/brightness.h"
+
+// Hardware Abstraction Layer
+#include "hal/module_manager.h"
+#include "hal/modules/temp_hum_module.h"
 
 // Storage manager
 #include "storage/fs_manager.h"
@@ -51,6 +56,10 @@ void launchClock() {
 void launchGames() {
     ScreenManager::getInstance().navigateTo(
         new GamesScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
+}
+void launchModules() {
+    ScreenManager::getInstance().navigateTo(
+        new ModulesScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
 }
 void resetToHome() {
     ScreenManager::getInstance().replaceRoot(new HomeScreen());
@@ -210,6 +219,16 @@ void setup() {
     // Load persisted theme and font before building any screen
     loadTheme();
     loadFont();
+
+    // Register hardware modules on their respective connectors.
+    // CN1: Temperature & Humidity sensor (DHT22 on IO22).
+    ModuleManager::getInstance().registerModule(new TempHumModule());
+
+    // Poll registered modules periodically. Each module decides internally
+    // how often it actually reads its hardware.
+    lv_timer_create([](lv_timer_t*) {
+        ModuleManager::getInstance().update();
+    }, 1000, NULL);
 
     // Initialize WiFi — loads saved credentials and auto-connects if enabled.
     // On successful connection, WifiManager triggers an NTP sync automatically.
