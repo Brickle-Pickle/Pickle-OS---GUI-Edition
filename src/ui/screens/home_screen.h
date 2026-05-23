@@ -5,7 +5,7 @@
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
 
-#define VERSION "v1.0.1"
+#define VERSION "v1.1.2"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -114,6 +114,10 @@ private:
             extern void launchModules();
             launchModules();
         };
+        static auto cbHttp = [](lv_event_t* e) {
+            extern void launchHttpTester();
+            launchHttpTester();
+        };
 
         const AppIcon apps[] = {
             { LV_SYMBOL_SETTINGS, "Settings", cbSettings },
@@ -124,6 +128,7 @@ private:
             { LV_SYMBOL_LIST, "About", cbAbout },
             { LV_SYMBOL_LOOP, "Clock", cbClock },
             { LV_SYMBOL_USB, "Modules", cbModules },
+            { LV_SYMBOL_UPLOAD, "HTTP", cbHttp },
         };
         const int APP_COUNT = sizeof(apps) / sizeof(apps[0]);
 
