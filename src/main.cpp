@@ -18,6 +18,7 @@
 #include "ui/screens/games_screen.h"
 #include "ui/screens/modules_screen.h"
 #include "ui/screens/http_tester_screen.h"
+#include "ui/screens/totp_screen.h"
 #include "ui/brightness.h"
 
 // Hardware Abstraction Layer
@@ -65,6 +66,10 @@ void launchModules() {
 void launchHttpTester() {
     ScreenManager::getInstance().navigateTo(
         new HttpTesterScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
+}
+void launchTotp() {
+    ScreenManager::getInstance().navigateTo(
+        new TotpScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
 }
 void resetToHome() {
     ScreenManager::getInstance().replaceRoot(new HomeScreen());
