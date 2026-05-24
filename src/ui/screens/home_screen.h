@@ -5,7 +5,7 @@
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
 
-#define VERSION "v1.1.3"
+#define VERSION "v1.2.0"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -91,9 +91,6 @@ private:
             extern void launchAbout();
             launchAbout();
         };
-        static auto cbAlerts = [](lv_event_t* e) {
-            ToastManager::getInstance().showToast("Alerts comming soon!", ToastType::ALERT);
-        };
         static auto cbWiFi = [](lv_event_t* e) {
             extern void launchWifi();
             launchWifi();
@@ -122,12 +119,16 @@ private:
             extern void launchTotp();
             launchTotp();
         };
+        static auto cbBrowser = [](lv_event_t* e) {
+            extern void launchBrowser();
+            launchBrowser();
+        };
 
         const AppIcon apps[] = {
             { LV_SYMBOL_SETTINGS, "Settings", cbSettings },
             { LV_SYMBOL_WIFI, "WiFi", cbWiFi },
             { LV_SYMBOL_SD_CARD, "Files", cbFiles },
-            { LV_SYMBOL_BELL, "Alerts", cbAlerts },
+            { LV_SYMBOL_DOWNLOAD, "Browser", cbBrowser },
             { LV_SYMBOL_PLAY, "Games", cbGames },
             { LV_SYMBOL_LIST, "About", cbAbout },
             { LV_SYMBOL_LOOP, "Clock", cbClock },
