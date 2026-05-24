@@ -20,7 +20,9 @@
 #include "ui/screens/http_tester_screen.h"
 #include "ui/screens/totp_screen.h"
 #include "ui/screens/browser_screen.h"
+#include "ui/screens/sysmon_screen.h"
 #include "ui/brightness.h"
+#include "system/sysmon_history.h"
 
 // Hardware Abstraction Layer
 #include "hal/module_manager.h"
@@ -75,6 +77,10 @@ void launchTotp() {
 void launchBrowser() {
     ScreenManager::getInstance().navigateTo(
         new BrowserScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
+}
+void launchSysMon() {
+    ScreenManager::getInstance().navigateTo(
+        new SysMonScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
 }
 void resetToHome() {
     ScreenManager::getInstance().replaceRoot(new HomeScreen());
@@ -186,6 +192,9 @@ void setup() {
     indev_drv.read_cb = readTouch;
     lv_indev_drv_register(&indev_drv);
     
+    // Start background heap sampler so SysMon can show pre-open history
+    SysMonHistory::getInstance().begin();
+
     // Initialize Toast Manager
     ToastManager::getInstance().init();
 

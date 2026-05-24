@@ -5,7 +5,7 @@
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
 
-#define VERSION "v1.2.0"
+#define VERSION "v1.3.0"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -123,32 +123,38 @@ private:
             extern void launchBrowser();
             launchBrowser();
         };
+        static auto cbSysMon = [](lv_event_t* e) {
+            extern void launchSysMon();
+            launchSysMon();
+        };
 
         const AppIcon apps[] = {
-            { LV_SYMBOL_SETTINGS, "Settings", cbSettings },
-            { LV_SYMBOL_WIFI, "WiFi", cbWiFi },
-            { LV_SYMBOL_SD_CARD, "Files", cbFiles },
-            { LV_SYMBOL_DOWNLOAD, "Browser", cbBrowser },
-            { LV_SYMBOL_PLAY, "Games", cbGames },
-            { LV_SYMBOL_LIST, "About", cbAbout },
-            { LV_SYMBOL_LOOP, "Clock", cbClock },
-            { LV_SYMBOL_USB, "Modules", cbModules },
-            { LV_SYMBOL_UPLOAD, "HTTP", cbHttp },
-            { "2FA", "Auth", cbTotp },
+            { LV_SYMBOL_SETTINGS,  "Settings", cbSettings },
+            { LV_SYMBOL_WIFI,      "WiFi",     cbWiFi     },
+            { LV_SYMBOL_SD_CARD,   "Files",    cbFiles    },
+            { LV_SYMBOL_DOWNLOAD,  "Browser",  cbBrowser  },
+            { LV_SYMBOL_PLAY,      "Games",    cbGames    },
+            { LV_SYMBOL_LIST,      "About",    cbAbout    },
+            { LV_SYMBOL_LOOP,      "Clock",    cbClock    },
+            { LV_SYMBOL_USB,       "Modules",  cbModules  },
+            { LV_SYMBOL_UPLOAD,    "HTTP",     cbHttp     },
+            { "2FA",               "Auth",     cbTotp     },
+            { LV_SYMBOL_EYE_OPEN,  "SysMon",  cbSysMon   },
         };
         const int APP_COUNT = sizeof(apps) / sizeof(apps[0]);
 
         const int COLS = 3;
-        const int ICON_SIZE = 64;
-        const int GAP = 8;
+        const int ICON_SIZE = 60;
+        const int GAP = 6;
+        const int ROW_GAP = 4;
         const int START_X = (240 - COLS * ICON_SIZE - (COLS - 1) * GAP) / 2;
-        const int START_Y = 44;
+        const int START_Y = 42;
 
         for (int i = 0; i < APP_COUNT; i++) {
             int col = i % COLS;
             int row = i / COLS;
             int x = START_X + col * (ICON_SIZE + GAP);
-            int y = START_Y + row * (ICON_SIZE + GAP + 4);
+            int y = START_Y + row * (ICON_SIZE + ROW_GAP);
 
             lv_obj_t* btn = lv_btn_create(_screen);
             lv_obj_set_size(btn, ICON_SIZE, ICON_SIZE);
