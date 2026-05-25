@@ -4,6 +4,8 @@
 #include "../theme/theme.h"
 #include "home_screen.h"
 #include "pin_lock_screen.h"
+#include "signature_lock_screen.h"
+#include "../../crypto/signature_store.h"
 
 #define SPLASH_DURATION_MS 2500
 
@@ -67,10 +69,16 @@ private:
         // (repeat_count=1). If we don't null it, onDestroy() called below would double-free it.
         self->_timer = nullptr;
         // replaceCurrent removes the splash from the nav stack so goBack() can't return to it.
-        // If the user has configured a device PIN, gate access through the lock screen.
-        ScreenBase* next = PinLockScreen::hasPin()
-            ? (ScreenBase*)new PinLockScreen()
-            : (ScreenBase*)new HomeScreen();
+        // Lock screen selection: signature wins over PIN when enrolled,
+        // and the signature screen itself falls back to PIN after 3 fails.
+        ScreenBase* next;
+        if (SignatureStore::hasTemplate() && PinLockScreen::hasPin()) {
+            next = new SignatureLockScreen();
+        } else if (PinLockScreen::hasPin()) {
+            next = new PinLockScreen();
+        } else {
+            next = new HomeScreen();
+        }
         ScreenManager::getInstance().replaceCurrent(next);
     }
 };

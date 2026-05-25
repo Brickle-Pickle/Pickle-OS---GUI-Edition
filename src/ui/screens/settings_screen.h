@@ -5,9 +5,12 @@
 #include "../keyboard_overlay.h"
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
+#include "../toast/toast_manager.h"
 #include "../../storage/config_store.h"
 #include "../brightness.h"
 #include "pin_lock_screen.h"
+#include "signature_enroll_screen.h"
+#include "../../crypto/signature_store.h"
 
 // SettingsScreen - System settings with all widget types demonstrated
 class SettingsScreen : public ScreenBase {
@@ -42,6 +45,7 @@ private:
     lv_obj_t* _taPass = nullptr;
     lv_obj_t* _taPin = nullptr;
     lv_obj_t* _pinStatus = nullptr;
+    lv_obj_t* _sigStatus = nullptr;
     KeyboardOverlay _kb;
 
     // Header with back button and screen title
@@ -469,6 +473,59 @@ private:
         lv_obj_set_style_text_color(btnLbl, gTheme->textDark, LV_PART_MAIN);
         lv_obj_set_style_text_font(btnLbl, gFontNormal, LV_PART_MAIN);
         lv_obj_center(btnLbl);
+
+        _makeSeparator(card);
+
+        // Signature unlock: requires a PIN as fallback. Status row + enroll
+        // and remove actions. Enrolment uses a small MLP trained offline.
+        lv_obj_t* rowSig = _makeRow(card, "Signature");
+        _sigStatus = lv_label_create(rowSig);
+        bool hasSig = SignatureStore::hasTemplate();
+        lv_label_set_text(_sigStatus, hasSig ? "Enrolled" : "Not set");
+        lv_obj_set_style_text_color(_sigStatus, hasSig ? gTheme->primary : gTheme->textSoft, LV_PART_MAIN);
+        lv_obj_set_style_text_font(_sigStatus, gFontSmall, LV_PART_MAIN);
+        lv_obj_align(_sigStatus, LV_ALIGN_RIGHT_MID, 0, 0);
+
+        _makeSeparator(card);
+
+        lv_obj_t* btnEnroll = lv_btn_create(card);
+        lv_obj_set_width(btnEnroll, lv_pct(100));
+        lv_obj_set_height(btnEnroll, 32);
+        lv_obj_set_style_bg_color(btnEnroll, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_radius(btnEnroll, 8, LV_PART_MAIN);
+        lv_obj_add_event_cb(btnEnroll, [](lv_event_t* e) {
+            if (!PinLockScreen::hasPin()) {
+                ToastManager::getInstance().showToast(
+                    "Set a PIN first", ToastType::ALERT);
+                return;
+            }
+            ScreenManager::getInstance().navigateTo(
+                new SignatureEnrollScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
+        }, LV_EVENT_CLICKED, this);
+        lv_obj_t* enrollLbl = lv_label_create(btnEnroll);
+        lv_label_set_text(enrollLbl, "Enroll signature");
+        lv_obj_set_style_text_color(enrollLbl, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_text_font(enrollLbl, gFontNormal, LV_PART_MAIN);
+        lv_obj_center(enrollLbl);
+
+        _makeSeparator(card);
+
+        lv_obj_t* btnSigClear = lv_btn_create(card);
+        lv_obj_set_width(btnSigClear, lv_pct(100));
+        lv_obj_set_height(btnSigClear, 32);
+        lv_obj_set_style_bg_color(btnSigClear, gTheme->primaryDark, LV_PART_MAIN);
+        lv_obj_set_style_radius(btnSigClear, 8, LV_PART_MAIN);
+        lv_obj_add_event_cb(btnSigClear, [](lv_event_t* e) {
+            SettingsScreen* self = (SettingsScreen*)lv_event_get_user_data(e);
+            SignatureStore::clear();
+            lv_label_set_text(self->_sigStatus, "Not set");
+            lv_obj_set_style_text_color(self->_sigStatus, gTheme->textSoft, LV_PART_MAIN);
+        }, LV_EVENT_CLICKED, this);
+        lv_obj_t* sigClearLbl = lv_label_create(btnSigClear);
+        lv_label_set_text(sigClearLbl, "Remove signature");
+        lv_obj_set_style_text_color(sigClearLbl, gTheme->textDark, LV_PART_MAIN);
+        lv_obj_set_style_text_font(sigClearLbl, gFontNormal, LV_PART_MAIN);
+        lv_obj_center(sigClearLbl);
     }
 
     // Section: Danger zone
@@ -504,10 +561,17 @@ private:
 
     // Called from onResume() to refresh dynamic values
     void _refreshSystemStats() {
-        if (!_ramBar || !_ramLabel) return;
-        uint32_t freeKb = esp_get_free_heap_size() / 1024;
-        lv_bar_set_value(_ramBar, (int32_t)freeKb, LV_ANIM_ON);
-        lv_label_set_text_fmt(_ramLabel, "%d KB", freeKb);
+        if (_ramBar && _ramLabel) {
+            uint32_t freeKb = esp_get_free_heap_size() / 1024;
+            lv_bar_set_value(_ramBar, (int32_t)freeKb, LV_ANIM_ON);
+            lv_label_set_text_fmt(_ramLabel, "%d KB", freeKb);
+        }
+        if (_sigStatus) {
+            bool hasSig = SignatureStore::hasTemplate();
+            lv_label_set_text(_sigStatus, hasSig ? "Enrolled" : "Not set");
+            lv_obj_set_style_text_color(_sigStatus,
+                hasSig ? gTheme->primary : gTheme->textSoft, LV_PART_MAIN);
+        }
     }
 
     // Helper: creates a rounded section card with flex column layout
