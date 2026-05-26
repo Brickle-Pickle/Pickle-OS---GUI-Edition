@@ -1,6 +1,7 @@
 #include "lua_engine.h"
 #include "../ui/theme/theme.h"
 #include "../ui/toast/toast_manager.h"
+#include "esp_heap_caps.h"
 
 static const char* kEngineKey = "_pickle_engine";
 
@@ -71,6 +72,31 @@ static int l_lvgl_create_button(lua_State* L) {
     lv_obj_set_style_shadow_width(b, 0, LV_PART_MAIN);
     lv_obj_clear_flag(b, LV_OBJ_FLAG_SCROLLABLE);
     lua_pushinteger(L, registerWidget(L, b));
+    return 1;
+}
+
+// Lightweight rectangle: a flat lv_obj with no border, shadow, padding or
+// scrolling. Intended for bulk-rendered primitives such as raycaster columns
+// where a full lv_canvas buffer would not fit in DRAM.
+static int l_lvgl_create_rect(lua_State* L) {
+    LuaEngine* e = LuaEngine::fromState(L);
+    int x = (int)luaL_checkinteger(L, 1);
+    int y = (int)luaL_checkinteger(L, 2);
+    int w = (int)luaL_checkinteger(L, 3);
+    int h = (int)luaL_checkinteger(L, 4);
+    lv_color_t color = parseColor(L, 5, gTheme->primary);
+    lv_obj_t* o = lv_obj_create(e->host());
+    lv_obj_set_pos(o, x, y);
+    lv_obj_set_size(o, w, h);
+    lv_obj_set_style_bg_color(o, color, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(o, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_border_width(o, 0, LV_PART_MAIN);
+    lv_obj_set_style_radius(o, 0, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(o, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(o, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(o, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(o, LV_OBJ_FLAG_CLICKABLE);
+    lua_pushinteger(L, registerWidget(L, o));
     return 1;
 }
 
@@ -222,13 +248,18 @@ static int l_canvas_create(lua_State* L) {
     int y = (int)luaL_checkinteger(L, 2);
     int w = (int)luaL_checkinteger(L, 3);
     int h = (int)luaL_checkinteger(L, 4);
-    if (c->buf) { free(c->buf); c->buf = nullptr; }
+    if (c->buf) { heap_caps_free(c->buf); c->buf = nullptr; }
     if (c->obj) { lv_obj_del(c->obj); c->obj = nullptr; }
     c->w = w;
     c->h = h;
-    c->buf = (lv_color_t*)malloc(w * h * sizeof(lv_color_t));
+    size_t bytes = (size_t)w * (size_t)h * sizeof(lv_color_t);
+    // Prefer PSRAM when present, fall back to any 8-bit accessible heap.
+    c->buf = (lv_color_t*)heap_caps_malloc(bytes, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!c->buf) {
-        luaL_error(L, "canvas alloc failed");
+        c->buf = (lv_color_t*)heap_caps_malloc(bytes, MALLOC_CAP_8BIT);
+    }
+    if (!c->buf) {
+        luaL_error(L, "canvas alloc failed (%d bytes)", (int)bytes);
         return 0;
     }
     c->obj = lv_canvas_create(e->host());
@@ -419,7 +450,7 @@ LuaEngine::~LuaEngine() {
         auto* c = (CanvasState*)lua_touserdata(_state, -1);
         lua_pop(_state, 1);
         if (c) {
-            if (c->buf) free(c->buf);
+            if (c->buf) heap_caps_free(c->buf);
             delete c;
         }
         auto* reg = widgetRegistry(_state);
@@ -493,6 +524,7 @@ bool LuaEngine::run(const String& script) {
 void LuaEngine::_registerApi() {
     static const luaL_Reg lvglApi[] = {
         { "create_button", l_lvgl_create_button },
+        { "create_rect", l_lvgl_create_rect },
         { "create_label", l_lvgl_create_label },
         { "set_text", l_lvgl_set_text },
         { "set_pos", l_lvgl_set_pos },
