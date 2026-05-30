@@ -5,7 +5,7 @@
 #include "../theme/theme.h"
 #include "../../network/wifi_manager.h"
 
-#define VERSION "v2.1.0"
+#define VERSION "v2.2.0"
 
 // Forward declarations for avoiding circular includes
 class SettingsScreen;
@@ -127,6 +127,10 @@ private:
             extern void launchSysMon();
             launchSysMon();
         };
+        static auto cbEditor3D = [](lv_event_t* e) {
+            extern void launchEditor3D();
+            launchEditor3D();
+        };
 
         const AppIcon apps[] = {
             { LV_SYMBOL_SETTINGS,  "Settings", cbSettings },
@@ -140,6 +144,7 @@ private:
             { LV_SYMBOL_UPLOAD,    "HTTP",     cbHttp     },
             { "2FA",               "Auth",     cbTotp     },
             { LV_SYMBOL_EYE_OPEN,  "SysMon",  cbSysMon   },
+            { LV_SYMBOL_IMAGE,     "3D Edit", cbEditor3D },
         };
         const int APP_COUNT = sizeof(apps) / sizeof(apps[0]);
 

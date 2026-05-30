@@ -21,6 +21,7 @@
 #include "ui/screens/totp_screen.h"
 #include "ui/screens/browser_screen.h"
 #include "ui/screens/sysmon_screen.h"
+#include "ui/screens/editor3d_screen.h"
 #include "ui/brightness.h"
 #include "system/sysmon_history.h"
 
@@ -81,6 +82,10 @@ void launchBrowser() {
 void launchSysMon() {
     ScreenManager::getInstance().navigateTo(
         new SysMonScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
+}
+void launchEditor3D() {
+    ScreenManager::getInstance().navigateTo(
+        new Editor3DScreen(), LV_SCR_LOAD_ANIM_MOVE_LEFT);
 }
 void resetToHome() {
     ScreenManager::getInstance().replaceRoot(new HomeScreen());
