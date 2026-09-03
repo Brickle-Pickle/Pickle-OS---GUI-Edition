@@ -1,5 +1,9 @@
 # Pickle OS - GUI Edition
 
+<p align="center">
+  <img src="images/preview.png" alt="Pickle OS GUI preview" width="720">
+</p>
+
 A full-featured graphical operating system for the ESP32-2432S028 development board with touchscreen interface, modular hardware expansion, and wireless connectivity.
 
 **Successor to [Pickle OS (Terminal Edition)](https://github.com/Brickle-Pickle/Pickle-OS)** - evolved from CLI to full GUI with LVGL.
@@ -120,6 +124,25 @@ Note: SPI and I2C buses can be software-remapped. Recommended to design a 3D-pri
 - [ ] BLE pairing UI in settings
 
 **Milestone**: Chat accessible from mobile browser + physical gamepad working via Bluetooth. High "wow factor" for demonstrations.
+
+---
+
+## 3D Hardware Design
+
+<img src="images/3d.png" alt="3D-printed adapter board for CN1/P3 modules" align="right" width="260" style="margin: 0 0 16px 24px;">
+
+One of the key goals of Pickle OS is to support **hot-swappable hardware modules** through the CN1 and P3 connectors exposed on the ESP32-2432S028. To make this practical and reliable, a custom **3D-printed adapter board** is planned as part of Phase 4.
+
+This adapter provides a standardised mounting point for sensor and peripheral modules, keeping wiring tidy and connections secure during transport or use. The design prioritises:
+
+- **Compact footprint** that fits the board profile
+- **Secure snap-fit** for both CN1 (5V logic) and P3 (3.3V logic) modules
+- **Labeled pin breakouts** to reduce wiring errors during prototyping
+- **Printable on any FDM printer** with standard PLA or PETG
+
+The STL files and Fusion 360 source will be published alongside the Phase 4 milestone release.
+
+<br clear="right">
 
 ---
 
